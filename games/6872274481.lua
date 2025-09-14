@@ -5,7 +5,7 @@
     by @stav
 
     ⚠️ :: NOT COMPLETE YET -> EXPECT BUGS
-    
+
 ]]
 
 local Library = loadstring(readfile('lover.lua/interface/interface.lua'))()
@@ -13,15 +13,8 @@ local Window = Library:Window({
     Name = 'lover'
 })
 
-local Combat, Movement, Exploit, Settings = Window:Tab({Icon = "rbxassetid://130346086543864", Tabs = {'Combat', 'Movement', 'Exploit', 'Settings'} })
-
-for _, tab in {Combat, Movement, Exploit, Settings} do
-	local Section = tab:Section({ Name = "Left Section" })
-	local Section = tab:Section({ Name = "Right Section" })
-end
-
 local Combat, Movement, Exploit, Settings =
-	Window:Tab({ Icon = "rbxassetid://130346086543864", Tabs = { "Rage", "Aimbot", "Settings" } })
+	Window:Tab({ Icon = "rbxassetid://130346086543864", Tabs = { 'Combat', 'Movement', 'Exploit', 'Settings' } })
 
 for _, tab in { Combat, Movement, Exploit, Settings } do
 	local Section = tab:Section({ Name = "Left Section" })
