@@ -15,7 +15,7 @@ local ids = {
 local function downloadFile(file)
     url = file:gsub('pineapple/', '')
     if not isfile(file) then
-        writefile(file, game:HttpGet('https://raw.githubusercontent.com/pinpple/pineapple/'..readfile('pineapple/commit.txt')..'/'..url))
+        writefile(file, game:HttpGet('https://raw.githubusercontent.com/sstvskids/lover.lua/'..readfile('pineapple/commit.txt')..'/'..url))
     end
 
     repeat task.wait() until isfile(file)

@@ -28,7 +28,7 @@ end
 local function downloadFile(file, read)
     url = file:gsub('lover.lua/', '')
     if not isfile(file) then
-        writefile(file, game:HttpGet('https://raw.githubusercontent.com/pinpple/pineapple/'..readfile('pineapple/commit.txt')..'/'..url))
+        writefile(file, game:HttpGet('https://raw.githubusercontent.com/sstvskids/lover.lua/'..readfile('pineapple/commit.txt')..'/'..url))
     end
 
     if read ~= nil and read == false then
@@ -45,7 +45,7 @@ for _, v in {'lover.lua', 'lover.lua/games', 'lover.lua/interface', 'lover.lua/l
     end
 end
 
-local commit = httpService:JSONDecode(game:HttpGet('https://api.github.com/repos/pinpple/pineapple/commits'))[1].sha
+local commit = httpService:JSONDecode(game:HttpGet('https://api.github.com/repos/sstvskids/lover.lua/commits'))[1].sha
 if not isfile('lover.lua/commit.txt') then
     writefile('lover.lua/commit.txt', commit)
 elseif readfile('lover.lua/commit.txt') ~= commit then
