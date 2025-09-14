@@ -191,7 +191,7 @@ do
 
 	local Verdana = RegisterFont("Verawdawdawdwaddana", 400, "Normal", {
 		Id = "Verdanawdawdwada.ttf",
-		Font = downloadFile('lover.lua/interface/fs-tahoma-8px.ttf', false),
+		Font = downloadFile('lover.lua/interface/fs-tahoma-8px.ttf'),
 	})
 
 	Library.Font = Font.new(Verdana, Enum.FontWeight.Regular, Enum.FontStyle.Normal)
