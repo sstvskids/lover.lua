@@ -13,9 +13,9 @@ local ids = {
 }
 
 local function downloadFile(file)
-    url = file:gsub('pineapple/', '')
+    url = file:gsub('lover.lua/', '')
     if not isfile(file) then
-        writefile(file, game:HttpGet('https://raw.githubusercontent.com/sstvskids/lover.lua/'..readfile('pineapple/commit.txt')..'/'..url))
+        writefile(file, game:HttpGet('https://raw.githubusercontent.com/sstvskids/lover.lua/'..readfile('lover.lua/commit.txt')..'/'..url))
     end
 
     repeat task.wait() until isfile(file)
@@ -24,8 +24,8 @@ end
 
 for i,v in ids do
     if i == game.PlaceId then
-        return loadstring(downloadFile('pineapple/games/'..v))()
+        return loadstring(downloadFile('lover.lua/games/'..v))()
     end
 end
 
-return loadstring(downloadFile('pineapple/games/universal.lua'))()
+return loadstring(downloadFile('lover.lua/games/universal.lua'))()

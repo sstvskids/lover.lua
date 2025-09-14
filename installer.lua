@@ -28,7 +28,7 @@ end
 local function downloadFile(file, read)
     url = file:gsub('lover.lua/', '')
     if not isfile(file) then
-        writefile(file, game:HttpGet('https://raw.githubusercontent.com/sstvskids/lover.lua/'..readfile('pineapple/commit.txt')..'/'..url))
+        writefile(file, game:HttpGet('https://raw.githubusercontent.com/sstvskids/lover.lua/'..readfile('lover.lua/commit.txt')..'/'..url))
     end
 
     if read ~= nil and read == false then
