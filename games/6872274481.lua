@@ -30,12 +30,38 @@ local Combat, Movement = Window:Tab(
     }
 )
 
+local Player, UI = Window:Tab(
+    {
+        Icon = "rbxassetid://134036018950416",
+        Tabs = {
+            'Player', 'UI'
+        }
+    }
+)
+
 do
     local AuraSection = Combat:Section({Name = 'Killaura'})
 end
 
 do
     local VeloSection = Combat:Section({ Name = 'Velocity'})
+end
+
+do
+    local MenuSection = UI:Section({Name = 'Interface'})
+
+    Window.Tweening = true
+	MenuSection:Label({ Name = "Menu Bind" }):Keybind({
+		Name = "Menu Bind",
+		Callback = function(bool)
+			if Window.Tweening then
+				return
+			end
+
+			Window.ToggleMenu(bool)
+		end,
+		Default = true
+	})
 end
 
 --[[for _, tab in { Combat, Movement, Exploit, Settings } do

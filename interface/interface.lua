@@ -2960,7 +2960,7 @@ function Library:Configs(window)
 	local Text
 	local ConfigText
 
-	local Tab = window:Tab({ Name = "Settings" })
+	local Tab = window:Tab({ Name = "Settings"})
 
 	local Section = Tab:Section({ Name = "Main", Side = "Left" })
 	ConfigHolder = Section:Dropdown({
