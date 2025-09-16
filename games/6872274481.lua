@@ -14,64 +14,46 @@ end
 
 local Library = loadstring(readfile('lover.lua/interface/interface.lua'))()
 
+local notif = function(title, txt, dur, buttons)
+    local packet = {
+        Title = title,
+        Text = txt,
+        Duration = dur
+    }
+
+    for i,v in buttons do
+        packet[i] = v
+    end
+
+    starterGui:SetCore('SendNotification', packet)
+end
+
 -- Services :)
 local playersService = cloneref(game:GetService('Players'))
+local starterGui = cloneref(game:GetService('StarterGui'))
+local replicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
 
-local Window = Library:Window({
-    Name = 'lover'
-})
+local main = Library.new()
 
-local Combat, Movement = Window:Tab(
-    {
-        Icon = "rbxassetid://130346086543864",
-        Tabs = {
-            'Combat', 'Movement'
-        }
+local tabs = {
+    Combat = main.create_tab('Combat'),
+    Blatant = main.create_tab('Blatant'),
+    Render = main.create_tab('Render'),
+    Settings = main.create_tab('Settings')
+}
+
+run(function()
+    local NetManaged = replicatedStorage.rbxts_include.node_modules["@rbxts"].net.out._NetManaged
+    local BlockEngine = replicatedStorage.rbxts_include.node_modules["@easy-games"]["block-engine"].node_modules["@rbxts"].net.out._NetManaged
+
+    local Remotes = {
+        SwordHit = NetManaged.SwordHit,
+        PickupItemDrop = NetManaged.PickupItemDrop,
+        SetInvItem = NetManaged.SetInvItem,
+        ProjectileFire = NetManaged.ProjectileFire,
+        ChestGetItem = NetManaged["Inventory/ChestGetItem"],
+        SetObservedChest = NetManaged["Inventory/SetObservedChest"],
+        PlaceBlock = BlockEngine.PlaceBlock,
+        DamageBlock = BlockEngine.DamageBlock,
     }
-)
-
-local Player, UI = Window:Tab(
-    {
-        Icon = "rbxassetid://134036018950416",
-        Tabs = {
-            'Player', 'UI'
-        }
-    }
-)
-
-do
-    local AuraSection = Combat:Section({Name = 'Killaura'})
-end
-
-do
-    local VeloSection = Combat:Section({ Name = 'Velocity'})
-end
-
-do
-    local MenuSection = UI:Section({Name = 'Interface'})
-
-    Window.Tweening = true
-	MenuSection:Label({ Name = "Menu Bind" }):Keybind({
-		Name = "Menu Bind",
-		Callback = function(bool)
-			if Window.Tweening then
-				return
-			end
-
-			Window.ToggleMenu(bool)
-		end,
-		Default = true
-	})
-end
-
---[[for _, tab in { Combat, Movement, Exploit, Settings } do
-	local Section = tab:Section({ Name = "Left Section" })
-	Section:Toggle({ Name = "Hello!" })
-	Section:Slider({})
-	Section:Label({ Name = "This is a label!" })
-	Section:Dropdown({ Options = { "Nigger1", "Nigger2", "Nigger3" }, Multi = true })
-	local Section = tab:Section({ Name = "Right Section" })
-end]]
-
-task.wait(0.25)
-Window.ToggleMenu(true)
+end)
