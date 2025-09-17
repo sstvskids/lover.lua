@@ -63,16 +63,16 @@ local function getPart(v)
 end
 
 run(function()
-    local NetManaged = replicatedStorage.rbxts_include.node_modules["@rbxts"].net.out._NetManaged
-    local BlockEngine = replicatedStorage.rbxts_include.node_modules["@easy-games"]["block-engine"].node_modules["@rbxts"].net.out._NetManaged
+    local NetManaged = replicatedStorage.rbxts_include.node_modules['@rbxts'].net.out._NetManaged
+    local BlockEngine = replicatedStorage.rbxts_include.node_modules['@easy-games']['block-engine'].node_modules['@rbxts'].net.out._NetManaged
 
     remotes = setmetatable({
         SwordHit = NetManaged.SwordHit,
         PickupItemDrop = NetManaged.PickupItemDrop,
         SetInvItem = NetManaged.SetInvItem,
         ProjectileFire = NetManaged.ProjectileFire,
-        ChestGetItem = NetManaged["Inventory/ChestGetItem"],
-        SetObservedChest = NetManaged["Inventory/SetObservedChest"],
+        ChestGetItem = NetManaged['Inventory/ChestGetItem'],
+        SetObservedChest = NetManaged['Inventory/SetObservedChest'],
         PlaceBlock = BlockEngine.PlaceBlock,
         DamageBlock = BlockEngine.DamageBlock,
     }, nil)
