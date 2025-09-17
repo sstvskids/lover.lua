@@ -81,7 +81,7 @@ end)
 run(function()
     local Speed
     local Value
-    tabs.Blatant.create_title({
+    tabs.Movement.create_title({
         name = 'Speed',
         section = 'left'
     })
