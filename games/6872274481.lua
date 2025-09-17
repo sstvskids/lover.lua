@@ -18,6 +18,13 @@ end
 
 local Library = loadstring(readfile('lover.lua/interface/interface.lua'))()
 
+-- Services :)
+local playersService = cloneref(game:GetService('Players'))
+local starterGui = cloneref(game:GetService('StarterGui'))
+local replicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
+local runService = cloneref(game:GetService('RunService'))
+local lplr = playersService.LocalPlayer
+
 local notif = function(title, txt, dur, buttons)
     local packet = {
         Title = title,
@@ -31,13 +38,6 @@ local notif = function(title, txt, dur, buttons)
 
     starterGui:SetCore('SendNotification', packet)
 end
-
--- Services :)
-local playersService = cloneref(game:GetService('Players'))
-local starterGui = cloneref(game:GetService('StarterGui'))
-local replicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
-local runService = cloneref(game:GetService('RunService'))
-local lplr = playersService.LocalPlayer
 
 local main = Library.new()
 
@@ -116,7 +116,7 @@ run(function()
         section = 'left',
 
         value = 23,
-        minimum_value = 16,
+        minimum_value = 0,
         maximum_value = 23
     })
 end)
