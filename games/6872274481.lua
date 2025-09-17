@@ -109,7 +109,7 @@ run(function()
             end
         end
     })
-    Value = tabs.Blatant.create_slider({
+    Value = tabs.Movement.create_slider({
         name = 'Speed',
         flag = 'speedslider',
 
