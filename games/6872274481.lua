@@ -16,7 +16,7 @@ local cloneref = cloneref or function(obj)
     return obj
 end
 
-local Library = loadstring(readfile('lover.lua/interface/interface.lua'))()
+local interface = loadstring(readfile('lover.lua/interface/interface.lua'))()
 
 -- Services :)
 local playersService = cloneref(game:GetService('Players'))
@@ -39,7 +39,7 @@ local notif = function(title, txt, dur, buttons)
     starterGui:SetCore('SendNotification', packet)
 end
 
-local main = Library.new()
+local main = interface.new()
 
 local remotes, tabs = {}, {
     Combat = main.create_tab('Combat'),
@@ -95,15 +95,14 @@ run(function()
 
         callback = function(callback)
             if callback then
-                Library.connections.Speed = runService.PreSimulation:Connect(function()
+                interface.connections.Speed = runService.PreSimulation:Connect(function()
                     if isAlive(lplr) then
                         lplr.Character.Humanoid.WalkSpeed = Value.value
                     end
                 end)
             else
-                if Library.connections.Speed then
-                    Library.connections.Speed:Disconnect()
-                    Library.connections.Speed = nil
+                if interface.connections.Speed then
+                    interface.connections.Speed:Disconnect()
                 end
                 lplr.Character.Humanoid.WalkSpeed = 16
             end
@@ -116,7 +115,7 @@ run(function()
         section = 'left',
 
         value = 23,
-        minimum_value = 0,
+        minimum_value = 16,
         maximum_value = 23
     })
 end)
