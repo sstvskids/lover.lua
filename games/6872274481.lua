@@ -74,7 +74,7 @@ run(function()
         ChestGetItem = NetManaged['Inventory/ChestGetItem'],
         SetObservedChest = NetManaged['Inventory/SetObservedChest'],
         PlaceBlock = BlockEngine.PlaceBlock,
-        DamageBlock = BlockEngine.DamageBlock,
+        DamageBlock = BlockEngine.DamageBlock
     }, nil)
 end)
 
