@@ -153,7 +153,7 @@ run(function()
             end
         end
     })
-    tabs.Movement.create_slider({
+    tabs.Settings.create_slider({
         name = 'FOV',
         flag = 'fovslider',
 
