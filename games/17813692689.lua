@@ -148,19 +148,15 @@ run(function()
             end
         end
     })
-    tabs.Blatant.create_slider({
-        name = 'Range',
-        flag = 'aurarange',
+    tabs.Movement.create_slider({
+        name = 'Speed',
+        flag = 'speedslider',
 
         section = 'left',
 
-        value = 15,
-        minimum_value = 1,
-        maximum_value = 20,
-
-        callback = function(value)
-            Value = value
-        end
+        value = 16,
+        minimum_value = 16,
+        maximum_value = 100
     })
 end)
 
