@@ -195,17 +195,63 @@ end)
 
 run(function()
     tabs.Settings.create_title({
-        name = 'FPS',
+        name = 'FOV',
         section = 'left'
+    })
+
+    local fov = 60
+    local oldfov
+    tabs.Settings.create_toggle({
+        name = 'FOVChanger',
+        flag = 'fov',
+
+        section = 'left',
+        enabled = false,
+
+        callback = function(callback)
+            if callback then
+                oldfov = workspace.CurrentCamera.FieldOfView
+                workspace.CurrentCamera.FieldOfView = fov
+				interface.connections.FOV = workspace.CurrentCamera:GetPropertyChangedSignal('FieldOfView'):Connect(function()
+					workspace.CurrentCamera.FieldOfView = fov
+                end)
+            else
+                if interface.connections.FOV then
+                    interface.connections.FOV:Disconnect()
+                end
+                workspace.CurrentCamera.FieldOfView = oldfov
+            end
+        end
+    })
+    tabs.Settings.create_slider({
+        name = 'FOV',
+        flag = 'fovslider',
+
+        section = 'left',
+
+        value = 60,
+        minimum_value = 30,
+        maximum_value = 120,
+
+        callback = function(val)
+            fov = val
+        end
+    })
+end)
+
+run(function()
+    tabs.Settings.create_title({
+        name = 'FPS',
+        section = 'right'
     })
 
     local fps = 60
     local fpscall
     tabs.Settings.create_toggle({
-        name = 'NoFPSLimit',
+        name = 'FPS',
         flag = 'nofpslimit',
 
-        section = 'left',
+        section = 'right',
         enabled = false,
 
         callback = function(callback)
@@ -221,7 +267,7 @@ run(function()
         name = 'FPS',
         flag = 'fpsslider',
 
-        section = 'left',
+        section = 'right',
 
         value = 999,
         minimum_value = 60,
@@ -239,14 +285,14 @@ end)
 run(function()
     tabs.Settings.create_title({
         name = 'Uninject',
-        section = 'right'
+        section = 'left'
     })
 
     tabs.Settings.create_toggle({
         name = 'Uninject',
         flag = 'uninject',
 
-        section = 'right',
+        section = 'left',
         enabled = false,
 
         callback = function(callback)

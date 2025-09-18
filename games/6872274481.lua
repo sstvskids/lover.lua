@@ -230,7 +230,6 @@ run(function()
                 interface.Flags['uninject'] = false
 				interface.save_flags()
                 task.wait(0.5)
-                Notifications.NewNotification(lplr, 'uninjected', 2, Color3.fromRGB(255,255,255), 'Yay!')
                 interface:uninject()
             end
         end
