@@ -93,6 +93,16 @@ run(function()
             end
         end
     })
+    tabs.Combat.create_toggle({
+        name = 'TPAura',
+        flag = 'tpaura',
+
+        section = 'left',
+        enabled = false,
+        callback = function(callback)
+            TPAura = callback
+        end
+    })
     tabs.Combat.create_slider({
         name = 'Range',
         flag = 'aurarange',
@@ -107,27 +117,16 @@ run(function()
             Range = value
         end
     })
-    tabs.Combat.create_toggle({
-        name = 'TPAura',
-        flag = 'tpaura',
-
-        section = 'left',
-        enabled = false,
-        callback = function(callback)
-            TPAura = callback
-        end
-    })
 end)
 
 run(function()
-    local Speed
     local Value
     tabs.Blatant.create_title({
         name = 'Speed',
         section = 'left'
     })
 
-    Speed = tabs.Blatant.create_toggle({
+    tabs.Blatant.create_toggle({
         name = 'Speed',
         flag = 'speed',
 
@@ -149,15 +148,19 @@ run(function()
             end
         end
     })
-    Value = tabs.Blatant.create_slider({
-        name = 'Speed',
-        flag = 'speedslider',
+    tabs.Blatant.create_slider({
+        name = 'Range',
+        flag = 'aurarange',
 
         section = 'left',
 
-        value = 35,
-        minimum_value = 16,
-        maximum_value = 100
+        value = 15,
+        minimum_value = 1,
+        maximum_value = 20,
+
+        callback = function(value)
+            Value = value
+        end
     })
 end)
 
