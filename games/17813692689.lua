@@ -50,7 +50,7 @@ end
 local main = interface.new()
 local tabs = {
     Combat = main.create_tab('Combat'),
-    Blatant = main.create_tab('Blatant'),
+    Movement = main.create_tab('Movement'),
     Render = main.create_tab('Render'),
     Settings = main.create_tab('Settings')
 }
@@ -121,12 +121,12 @@ end)
 
 run(function()
     local Value
-    tabs.Blatant.create_title({
+    tabs.Movement.create_title({
         name = 'Speed',
         section = 'left'
     })
 
-    tabs.Blatant.create_toggle({
+    tabs.Movement.create_toggle({
         name = 'Speed',
         flag = 'speed',
 
@@ -137,7 +137,7 @@ run(function()
             if callback then
                 interface.connections.Speed = runService.PreSimulation:Connect(function()
                     if isAlive(lplr) then
-                        lplr.Character.Humanoid.WalkSpeed = Value.value
+                        lplr.Character.Humanoid.WalkSpeed = Value
                     end
                 end)
             else
@@ -156,17 +156,21 @@ run(function()
 
         value = 16,
         minimum_value = 16,
-        maximum_value = 100
+        maximum_value = 100,
+
+        callback = function(val)
+            Value = val
+        end
     })
 end)
 
 run(function()
-    tabs.Blatant.create_title({
+    tabs.Movement.create_title({
         name = 'Grace',
         section = 'right'
     })
 
-    tabs.Blatant.create_toggle({
+    tabs.Movement.create_toggle({
         name = 'DoubleGrace',
         flag = 'grace',
 
