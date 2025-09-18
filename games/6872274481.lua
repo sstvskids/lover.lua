@@ -142,7 +142,7 @@ run(function()
             if callback then
                 oldfov = workspace.CurrentCamera.FieldOfView
                 workspace.CurrentCamera.FieldOfView = fov
-				interface.connections.FOV = workspace.CurrentCamera:GetPropertyChangedSignal('FieldOfView'):Connect(function()
+				interface.connections.FOV = runService.PreSimulation:Connect(function()
 					workspace.CurrentCamera.FieldOfView = fov
                 end)
             else
