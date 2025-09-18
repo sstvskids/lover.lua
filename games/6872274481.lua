@@ -79,14 +79,13 @@ run(function()
 end)
 
 run(function()
-    local Speed
     local Value
     tabs.Movement.create_title({
         name = 'Speed',
         section = 'left'
     })
 
-    Speed = tabs.Movement.create_toggle({
+    tabs.Movement.create_toggle({
         name = 'Speed',
         flag = 'speed',
 
@@ -97,7 +96,7 @@ run(function()
             if callback then
                 interface.connections.Speed = runService.PreSimulation:Connect(function()
                     if isAlive(lplr) then
-                        lplr.Character.Humanoid.WalkSpeed = Value.value
+                        lplr.Character.Humanoid.WalkSpeed = Value
                     end
                 end)
             else
@@ -108,14 +107,132 @@ run(function()
             end
         end
     })
-    Value = tabs.Movement.create_slider({
+    tabs.Movement.create_slider({
         name = 'Speed',
         flag = 'speedslider',
 
         section = 'left',
 
-        value = 23,
+        value = 16,
         minimum_value = 16,
-        maximum_value = 23
+        maximum_value = 23,
+
+        callback = function(val)
+            Value = val
+        end
+    })
+end)
+
+run(function()
+    tabs.Settings.create_title({
+        name = 'FOV',
+        section = 'left'
+    })
+
+    local fov = 60
+    local oldfov
+    tabs.Settings.create_toggle({
+        name = 'FOVChanger',
+        flag = 'fov',
+
+        section = 'left',
+        enabled = false,
+
+        callback = function(callback)
+            if callback then
+                oldfov = workspace.CurrentCamera.FieldOfView
+                workspace.CurrentCamera.FieldOfView = fov
+				interface.connections.FOV = workspace.CurrentCamera:GetPropertyChangedSignal('FieldOfView'):Connect(function()
+					workspace.CurrentCamera.FieldOfView = fov
+                end)
+            else
+                if interface.connections.FOV then
+                    interface.connections.FOV:Disconnect()
+                end
+                workspace.CurrentCamera.FieldOfView = oldfov
+            end
+        end
+    })
+    tabs.Movement.create_slider({
+        name = 'FOV',
+        flag = 'fovslider',
+
+        section = 'left',
+
+        value = 60,
+        minimum_value = 30,
+        maximum_value = 120,
+
+        callback = function(val)
+            fov = val
+        end
+    })
+end)
+
+run(function()
+    tabs.Settings.create_title({
+        name = 'FPS',
+        section = 'right'
+    })
+
+    local fps = 60
+    local fpscall
+    tabs.Settings.create_toggle({
+        name = 'FPS',
+        flag = 'nofpslimit',
+
+        section = 'right',
+        enabled = false,
+
+        callback = function(callback)
+            fpscall = callback
+            if callback then
+                setfpscap(fps)
+            else
+                setfpscap(60)
+            end
+        end
+    })
+    tabs.Settings.create_slider({
+        name = 'FPS',
+        flag = 'fpsslider',
+
+        section = 'right',
+
+        value = 999,
+        minimum_value = 60,
+        maximum_value = 999,
+
+        callback = function(value)
+            fps = value
+            if fpscall then
+                setfpscap(value)
+            end
+        end
+    })
+end)
+
+run(function()
+    tabs.Settings.create_title({
+        name = 'Uninject',
+        section = 'left'
+    })
+
+    tabs.Settings.create_toggle({
+        name = 'Uninject',
+        flag = 'uninject',
+
+        section = 'left',
+        enabled = false,
+
+        callback = function(callback)
+            if callback then
+                interface.Flags['uninject'] = false
+				interface.save_flags()
+                task.wait(0.5)
+                Notifications.NewNotification(lplr, 'uninjected', 2, Color3.fromRGB(255,255,255), 'Yay!')
+                interface:uninject()
+            end
+        end
     })
 end)
