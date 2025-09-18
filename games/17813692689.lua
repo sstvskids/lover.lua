@@ -20,12 +20,18 @@ local playersService = cloneref(game:GetService('Players'))
 local runService = cloneref(game:GetService('RunService'))
 local lplr = playersService.LocalPlayer
 
-local function getURL(url)
-	return game:HttpGet('https://raw.githubusercontent.com/sstvskids/journey.lol/'..httpService:JSONDecode(game:HttpGet('https://api.github.com/repos/sstvskids/journey.lol/commits'))[1].sha..'/'..url, true)
+local function downloadFile(file)
+    url = file:gsub('lover.lua/', '')
+    if not isfile(file) then
+        writefile(file, game:HttpGet('https://raw.githubusercontent.com/sstvskids/lover.lua/'..readfile('lover.lua/commit.txt')..'/'..url))
+    end
+
+    repeat task.wait() until isfile(file)
+    return readfile(file)
 end
 
 local interface = loadstring(readfile('lover.lua/interface/interface.lua'))()
-local Notifications = loadstring(getURL('notif.lua'))()
+local Notifications = loadstring(downloadFile('lover.lua/libraries/journey-notif.lua'))()
 
 local function isAlive(v)
     if v.Character and v.Character:FindFirstChild('Humanoid') and v.Character:FindFirstChild('HumanoidRootPart') and v.Character.Humanoid.Health > 0 then
