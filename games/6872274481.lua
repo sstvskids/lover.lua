@@ -116,17 +116,19 @@ local function spoofTool(item: string): string
     end
 end
 
-local function attackPlr(plr, weapon)
-    local targetPos = plr.Character.PrimaryPart.Position
+function attackEntity(Entity: any, Weapon: any)
+    local targetPos = Entity.Character.PrimaryPart.Position
+    local selfpos = lplr.Character.PrimaryPart.Position
 
-    local delta = (targetPos - lplr.Character.PrimaryPart.Position)
-    local dir = CFrame.lookAt(lplr.Character.PrimaryPart.Position, targetPos).LookVector
-	local pos = lplr.Character.PrimaryPart.Position + dir * math.max(delta.Magnitude - 14.3999, 0)
-
+    local delta = (targetPos - selfpos)
+    local dir = CFrame.lookAt(selfpos, targetPos).LookVector
+	local pos = selfpos + dir * math.max(delta.Magnitude - 14.39999, 0)
     remotes.SwordHit:FireServer({
-        chargedAttack = {chargeRatio = 0},
-        entityInstance = plr.Character,
-        weapon = weapon,
+        chargedAttack = {
+            chargeRatio = 0
+        },
+        entityInstance = Entity.Character,
+        weapon = Weapon,
         validate = {
             raycast = {
 				cameraPosition = {value = pos},
@@ -140,6 +142,8 @@ local function attackPlr(plr, weapon)
             },
         }
     })
+    
+    return "Succesfully sent"
 end
 
 --[[
@@ -174,31 +178,7 @@ run(function()
                             print(bestTool)
                             print(hasItem(bestTool))
                             if hasItem(bestTool) --[[and isAlive(lplr)]] then
-                                local targetPos = v.Character.PrimaryPart.Position
-
-                                local delta = (targetPos - lplr.Character.PrimaryPart.Position)
-                                local dir = CFrame.lookAt(lplr.Character.PrimaryPart.Position, targetPos).LookVector
-                                local pos = lplr.Character.PrimaryPart.Position + dir * math.max(delta.Magnitude - 14.3999, 0)
-
-                                print('fired fr')
-                                remotes.SwordHit:FireServer({
-                                    chargedAttack = {chargeRatio = 0},
-                                    entityInstance = v.Character,
-                                    weapon = bestTool,
-                                    validate = {
-                                        raycast = {
-                                            cameraPosition = {value = pos},
-                                            cursorDirection = {value = dir}
-                                        },
-                                        targetPosition = {
-                                            value = targetPos
-                                        },
-                                        selfPosition = {
-                                            value = pos
-                                        },
-                                    }
-                                })
-                                print('ok')
+                                attackEntity(v, bestTool)
                             end
                         end
                     end
