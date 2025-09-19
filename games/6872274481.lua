@@ -121,7 +121,7 @@ local function attackPlr(plr, weapon)
 
     local delta = (targetPos - lplr.Character.PrimaryPart.Position)
     local dir = CFrame.lookAt(lplr.Character.PrimaryPart.Position, targetPos).LookVector
-	local pos = lplr.Character.PrimaryPart.Position + dir * math.max(delta.Magnitude - 14.39999, 0)
+	local pos = lplr.Character.PrimaryPart.Position + dir * math.max(delta.Magnitude - 14.3999, 0)
 
     plr.SwordHit:FireServer({
         chargedAttack = {chargeRatio = 0},
