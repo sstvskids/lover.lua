@@ -166,19 +166,16 @@ run(function()
         callback = function(callback)
             if callback then
                 interface.connections.Aura = runService.PreSimulation:Connect(function()
-                    task.spawn(function()
-                        for _, v in playersService:GetPlayers() do
-                            if v ~= lplr and isAlive(v) and (getPart(lplr).Position - getPart(v).Position).Magnitude <= Range then
-                                local bestTool = getBestSword()
+                    for _, v in playersService:GetPlayers() do
+                        if isAlive(v) and v ~= lplr and (getPart(lplr).Position - getPart(v).Position).Magnitude <= Range then
+                            local bestTool = getBestSword()
+                            spoofTool(bestTool)
 
-                                if hasItem(bestTool) then
-                                    attackPlr(v, bestTool)
-                                else
-                                    spoofTool(bestTool)
-                                end
+                            if hasItem(bestTool) then
+                                attackPlr(v, bestTool)
                             end
                         end
-                    end)
+                    end
                 end)
             else
                 if interface.connections.Aura then
@@ -395,5 +392,3 @@ run(function()
         end
     })
 end)
-
-getBestTool('Swords')
