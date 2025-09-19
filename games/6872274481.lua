@@ -68,7 +68,7 @@ local function isAlive(v)
 end
 
 local function hasItem(item: string): string
-    if isAlive(lplr) and workspace[lplr.Name]:FindFirstChild(item) then return true end
+    if isAlive(lplr) and workspace[lplr.Name].HandInvItem.Value == item then return true end
     
     return false
 end
@@ -144,7 +144,7 @@ end
 
 run(function()
     local Aura
-    local Range
+    local Range = 18
     tabs.Combat.create_title({
         name = 'Aura',
         section = 'left'
