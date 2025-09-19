@@ -60,7 +60,7 @@ local remotes, tabs = {}, {
 }
 
 local function isAlive(v)
-    if v.Character and v.Character:FindFirstChild('Humanoid') and v.Character:FindFirstChild('HumanoidRootPart') and v.Character.Humanoid.Health > 0 then
+    if workspace[v.Name] then
         return true
     end
 
@@ -173,13 +173,14 @@ run(function()
 
                             print(bestTool)
                             print(hasItem(bestTool))
-                            if hasItem(bestTool) and isAlive(lplr) then
+                            if hasItem(bestTool) --[[and isAlive(lplr)]] then
                                 local targetPos = v.Character.PrimaryPart.Position
 
                                 local delta = (targetPos - lplr.Character.PrimaryPart.Position)
                                 local dir = CFrame.lookAt(lplr.Character.PrimaryPart.Position, targetPos).LookVector
                                 local pos = lplr.Character.PrimaryPart.Position + dir * math.max(delta.Magnitude - 14.3999, 0)
 
+                                print('fired fr')
                                 remotes.SwordHit:FireServer({
                                     chargedAttack = {chargeRatio = 0},
                                     entityInstance = v.Character,
@@ -197,6 +198,7 @@ run(function()
                                         },
                                     }
                                 })
+                                print('ok')
                             end
                         end
                     end
