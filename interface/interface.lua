@@ -3725,7 +3725,7 @@
             end)
         end
 
-		Library.create_notif = notifications.create_notification
+		library.create_notif = notifications.create_notification
     --
 -- 
 
