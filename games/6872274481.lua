@@ -68,9 +68,11 @@ local function isAlive(v)
 end
 
 local function hasItem(item: string)
-    for i,v in workspace[lplr.Name].InventoryFolder.Value:GetChildren() do
-        if v.Name:lower():find(item:lower()) then
-            return true
+    if isAlive(lplr) then
+        for i,v in workspace[lplr.Name].InventoryFolder.Value:GetChildren() do
+            if v.Name:lower():find(item:lower()) then
+                return true
+            end
         end
     end
 
@@ -109,7 +111,7 @@ local AutoTool = false
 local function spoofTool(item: string): string
     if AutoTool == true and isAlive(lplr) and not hasItem(item) then
         remotes.SetInvItem:InvokeServer({
-			['hand'] = item
+			['hand'] = workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(item)
 		})
     end
 end
@@ -169,6 +171,8 @@ run(function()
                             local bestTool = getBestSword()
                             spoofTool(bestTool)
 
+                            print(bestTool)
+                            print(hasItem(bestTool))
                             if hasItem(bestTool) and isAlive(lplr) then
                                 local targetPos = v.Character.PrimaryPart.Position
 
