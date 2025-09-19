@@ -68,7 +68,7 @@
 
 -- Library init
     getgenv().library = {
-        directory = "milenium",
+        directory = "lover.lua",
         folders = {
             "/fonts",
             "/configs",
@@ -182,9 +182,9 @@
                 },
             }
 
-            writefile(Name .. ".font", http_service:JSONEncode(Data))
+            writefile("lover.lua/interface/"..Name .. ".font", http_service:JSONEncode(Data))
 
-            return getcustomasset(Name .. ".font");
+            return getcustomasset("lover.lua/interface/"..Name .. ".font");
         end
         
         local Medium = Register_Font("Medium", 200, "Normal", {

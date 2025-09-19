@@ -8,9 +8,18 @@
 
 ]]
 
+local interface = loadstring(readfile('lover.lua/interface/interface.lua'))()
+
 local run = function(func)
     local suc, res = pcall(func)
-    return suc == true and res or suc == false and ((writefile and writefile('lover.lua/errorlog.txt', res)) or warn(res))
+    
+	if suc then return res else
+		interface:create_notification({
+			name = 'error: lover.lua',
+			info = 'Requested remote or function failed to load',
+			lifetime = 6
+		})
+	end
 end
 local cloneref = cloneref or function(obj)
     return obj
@@ -26,7 +35,6 @@ local function downloadFile(file)
     return readfile(file)
 end
 
-local interface = loadstring(readfile('lover.lua/interface/interface.lua'))()
 local itemMeta = loadstring(downloadFile('lover.lua/libraries/meta.lua'))()
 
 -- Services :)
@@ -37,24 +45,11 @@ local runService = cloneref(game:GetService('RunService'))
 local inputService = cloneref(game:GetService('UserInputService'))
 local lplr = playersService.LocalPlayer
 
-local notif = function(title, txt, dur)
-    local packet = {
-        Title = title,
-        Text = txt,
-        Duration = dur
-    }
-
-    starterGui:SetCore('SendNotification', packet)
-end
-
-local main = interface.new()
-
-local remotes, tabs = {}, {
-    Combat = main.create_tab('Combat'),
-    Movement = main.create_tab('Movement'),
-    Render = main.create_tab('Render'),
-    Settings = main.create_tab('Settings')
-}
+local window = interface:window({
+	name = 'lover',
+	suffix = '.lua',
+	gameInfo = 'Milenium for Roblox Bedwars'
+})
 
 local function isAlive(v)
     if workspace:FindFirstChild(v.Name) then
@@ -94,9 +89,10 @@ local function getBestSword()
         end
     end
 
-    return workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(bestItem)
+    return workspace:FindFirstChild(lplr.Name).InventoryFolder.Value:FindFirstChild(bestItem)
 end
 
+local remotes
 run(function()
     local NetManaged = replicatedStorage.rbxts_include.node_modules['@rbxts'].net.out._NetManaged
     local BlockEngine = replicatedStorage.rbxts_include.node_modules['@easy-games']['block-engine'].node_modules['@rbxts'].net.out._NetManaged
@@ -124,27 +120,34 @@ end
 
 --[[
 
-    Combat
+	Combat
 
 ]]
 
+local self_section, enemies = window:tab({
+	name = 'Combat',
+	tabs = {'Self', 'Enemies'}
+})
+
 run(function()
-    tabs.Combat.create_title({
-        name = 'Knockback',
-        section = 'left'
-    })
+	local VeloConn
+	local FPS
+    
+    local column = self_section:column({})
+    local knockback = column:section({
+		name = 'Knockback',
+		default = true
+	})
 
-    tabs.Combat.create_toggle({
-        name = 'Velocity',
-        flag = 'velocity',
+	knockback:toggle({
+		name = 'Velocity',
+		info = 'Prevents knockback',
 
-        section = 'left',
-        enabled = false,
-
-        callback = function(callback)
+		seperator = true,
+		callback = function(callback)
             if callback then
                 local lastHP = lplr.Character.Humanoid.Health
-                interface.connections.Velocity = runService.RenderStepped:Connect(function()
+                VeloConn = runService.RenderStepped:Connect(function()
                     if isAlive(lplr) then
                         if lplr.Character.Humanoid.Health < lastHP then
                             lplr.Character.PrimaryPart.Velocity = Vector3.zero
@@ -153,33 +156,74 @@ run(function()
                     end
                 end)
             else
-                if interface.connections.Velocity then
-                    interface.connections.Velocity:Disconnect()
-                end
-            end
-        end,
-    })
+				if VeloConn then
+					VeloConn:Disconnect()
+				end
+			end
+        end
+	})
+
+	local column2 = self_section:column({})
+	
+	local tool = column2:section({
+		name = 'Tool',
+		default = true
+	})
+
+	tool:toggle({
+		name = 'AutoTool',
+		info = 'Automatically switches your tool',
+
+		seperator = true,
+		callback = function(callback)
+            AutoTool = callback
+        end
+	})
+
+	local column3 = self_section:column({})
+
+	local fps = column3:section({
+		name = 'FPS',
+		default = true
+	})
+
+	fps:toggle({
+		name = 'FPS',
+		seperator = true,
+		callback = function(callback)
+			setfpscap(callback and FPS or 60)
+        end
+	})
+	fps:slider({
+		name = 'FPS',
+		min = 60,
+		max = 999,
+		interval = 1,
+		callback = function(int)
+			FPS = int
+		end
+	})
 end)
 
 run(function()
-    local Aura
-    local Range = 18
-    local Face = false
-    tabs.Combat.create_title({
-        name = 'Aura',
-        section = 'right'
-    })
+	local AuraConn
+	local Range
+	local Face
+    
+    local column = enemies:column({})
+    local section = column:section({
+		name = 'Aura',
+		default = true
+	})
 
-    tabs.Combat.create_toggle({
-        name = 'Aura',
-        flag = 'aura',
+	section:toggle({
+		name = 'Aura',
+		info = 'Attacks players around you',
 
-        section = 'right',
-        enabled = false,
-
-        callback = function(callback)
+		seperator = true,
+		callback = function(callback)
             if callback then
-                interface.connections.Aura = runService.PreSimulation:Connect(function()
+                AuraConn = runService.PreSimulation:Connect(function()
 					if isAlive(lplr) then
 						local entity = getNearestEntity(Range)
 
@@ -218,127 +262,98 @@ run(function()
 					end
                 end)
             else
-                if interface.connections.Aura then
-                    interface.connections.Aura:Disconnect()
+                if AuraConn then
+                    AuraConn:Disconnect()
                 end
             end
         end
-    })
-    tabs.Combat.create_slider({
-        name = 'Range',
-        flag = 'rangeslider',
-
-        section = 'right',
-
-        value = 18,
-        minimum_value = 1,
-        maximum_value = 18,
-
-        callback = function(val)
-            Range = val
-        end
-    })
-    tabs.Combat.create_toggle({
-        name = 'Face',
-        flag = 'auraface',
-
-        section = 'right',
-        enabled = false,
-
-        callback = function(callback)
-            Face = callback
-        end
-    })
-end)
-
-run(function()
-    tabs.Combat.create_title({
-        name = 'AutoTool',
-        section = 'left'
-    })
-
-    tabs.Combat.create_toggle({
-        name = 'AutoTool',
-        flag = 'autotool',
-
-        section = 'left',
-        enabled = false,
-
-        callback = function(callback)
-            AutoTool = callback
-        end
-    })
+	})
+	section:slider({
+		name = 'Range',
+		min = 0,
+		max = 18,
+		interval = 1,
+		callback = function(int)
+			Range = int
+		end
+	})
+	section:toggle({
+		name = 'Face',
+		seperator = true,
+		callback = function(callback)
+			Face = callback
+		end
+	})
 end)
 
 --[[
 
-    Movement
+	Movement
 
 ]]
 
+local Main = window:tab({
+	name = 'Movement',
+	tabs = {'Main'}
+})
+
 run(function()
-    local Value
-    tabs.Movement.create_title({
-        name = 'Speed',
-        section = 'left'
-    })
+	local SpeedConn
+	local Value
 
-    tabs.Movement.create_toggle({
-        name = 'Speed',
-        flag = 'speed',
+	local column = Main:column({})
+    local Speed = column:section({
+		name = 'Speed',
+		default = true
+	})
 
-        section = 'left',
-        enabled = false,
+	Speed:toggle({
+		name = 'Speed',
+		info = 'Increases your speed',
 
-        callback = function(callback)
+		seperator = true,
+		callback = function(callback)
             if callback then
-                interface.connections.Speed = runService.PreSimulation:Connect(function()
+				SpeedConn = runService.PreSimulation:Connect(function()
                     if isAlive(lplr) then
                         lplr.Character.Humanoid.WalkSpeed = Value
                     end
                 end)
-            else
-                if interface.connections.Speed then
-                    interface.connections.Speed:Disconnect()
-                end
-                lplr.Character.Humanoid.WalkSpeed = 16
-            end
-        end
-    })
-    tabs.Movement.create_slider({
-        name = 'Speed',
-        flag = 'speedslider',
+			else
+				if SpeedCon then
+					SpeedCon:Disconnect()
+				end
+				lplr.Character.Humanoid.WalkSpeed = 16
+			end
+		end
+	})
+	Speed:slider({
+		name = 'Speed',
+		min = 0,
+		max = 23,
+		interval = 1,
+		callback = function(int)
+			Value = int
+		end
+	})
 
-        section = 'left',
+	local FlyVal = 0
+	local Flight, FlightUp, FlightDown
+	local column2 = Main:column({})
+	local Fly = column2:section({
+		name = 'Fly',
+		default = true
+	})
 
-        value = 16,
-        minimum_value = 16,
-        maximum_value = 23,
+	local toggle = Fly:toggle({
+		name = 'Flight',
+		info = 'Makes you fly around in the air',
 
-        callback = function(val)
-            Value = val
-        end
-    })
-end)
-
-run(function()
-    local FlyVal = 0
-    tabs.Movement.create_title({
-        name = 'Flight',
-        section = 'right'
-    })
-
-    tabs.Movement.create_toggle({
-        name = 'Flight',
-        flag = 'flight',
-
-        section = 'right',
-        enabled = false,
-
-        callback = function(callback)
+		seperator = true,
+		callback = function(callback)
             if callback then
-                FlyVal = 0
-                interface.connections.FlightUp = inputService.InputBegan:Connect(function(input)
+				FlyVal = 0
+                FlightUp = inputService.InputBegan:Connect(function(input)
 					if not inputService:GetFocusedTextBox() then
 						if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
 							FlyVal = 44
@@ -347,7 +362,7 @@ run(function()
 						end
 					end
 				end)
-				interface.connections.FlightDown = inputService.InputEnded:Connect(function(input)
+				FlightDown = inputService.InputEnded:Connect(function(input)
 					if not inputService:GetFocusedTextBox() then
 						if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
 							FlyVal = 0
@@ -357,26 +372,35 @@ run(function()
 					end
 				end)
 
-                interface.connections.Flight = runService.RenderStepped:Connect(function()
+                Flight = runService.RenderStepped:Connect(function()
                     if isAlive(lplr) then
                         lplr.Character.PrimaryPart.Velocity = Vector3.new(lplr.Character.PrimaryPart.Velocity.X, FlyVal, lplr.Character.PrimaryPart.Velocity.Z)
                     end
                 end)
-            else
-                if interface.connections.Flight then
-                    interface.connections.Flight:Disconnect()
+			else
+                if Flight then
+                    Flight:Disconnect()
                 end
 
-                if interface.connections.FlightUp then
-                    interface.connections.FlightUp:Disconnect()
+                if FlightUp then
+                    FlightUp:Disconnect()
                 end
 
-                if interface.connections.FlightDown then
-                    interface.connections.FlightDown:Disconnect()
+                if FlightDown then
+                    FlightDown:Disconnect()
                 end
-            end
-        end
-    })
+			end
+		end
+	})
+
+	local sub_section = toggle:settings({})
+	sub_section:keybind({
+		name = 'Keybind',
+		callback = function()
+			toggle.enabled = not toggle.enabled 
+            toggle.set(toggle.enabled)
+		end
+	})
 end)
 
 --[[
@@ -385,127 +409,54 @@ end)
 
 ]]
 
-print('real render')
-
---[[
-
-    Settings
-
-]]
+local self_section2, enemies2 = window:tab({
+	name = 'Render',
+	tabs = {'Self', 'Enemies'}
+})
 
 run(function()
-    tabs.Settings.create_title({
-        name = 'FOV',
-        section = 'left'
-    })
+	local FOVConn
+	local fov, oldfov = 60, 60
+	local column = self_section2:column({})
+    local FOV = column:section({
+		name = 'FOV',
+		default = true
+	})
 
-    local fov = 60
-    local oldfov = 60
-    tabs.Settings.create_toggle({
-        name = 'FOVChanger',
-        flag = 'fov',
-
-        section = 'left',
-        enabled = false,
-
-        callback = function(callback)
-            if callback then
-                oldfov = workspace.CurrentCamera.FieldOfView
+	FOV:toggle({
+		name = 'FOV',
+		seperator = true,
+		callback = function(callback)
+			if callback then
+				oldfov = workspace.CurrentCamera.FieldOfView
                 workspace.CurrentCamera.FieldOfView = fov
-				interface.connections.FOV = runService.PreSimulation:Connect(function()
+
+				FOVConn = runService.RenderStepped:Connect(function()
 					workspace.CurrentCamera.FieldOfView = fov
-                end)
-            else
-                if interface.connections.FOV then
-                    interface.connections.FOV:Disconnect()
-                end
-                workspace.CurrentCamera.FieldOfView = oldfov
-            end
+				end)
+			else
+				if FOVConn then
+					FOVConn:Disconnect()
+				end
+				workspace.CurrentCamera.FieldOfView = oldfov
+			end
         end
-    })
-    tabs.Settings.create_slider({
-        name = 'FOV',
-        flag = 'fovslider',
-
-        section = 'left',
-
-        value = 60,
-        minimum_value = 30,
-        maximum_value = 120,
-
-        callback = function(val)
-            fov = val
-        end
-    })
+	})
+	FOV:slider({
+		name = 'FOV',
+		min = 60,
+		max = 120,
+		interval = 1,
+		callback = function(int)
+			fov = int
+		end
+	})
 end)
 
-run(function()
-    tabs.Settings.create_title({
-        name = 'FPS',
-        section = 'right'
-    })
+interface:create_notification({
+	name = 'lover.lua',
+	info = 'thanks pook :)',
+	lifetime = 6
+})
 
-    local fps = 60
-    local fpscall
-    tabs.Settings.create_toggle({
-        name = 'FPS',
-        flag = 'nofpslimit',
-
-        section = 'right',
-        enabled = false,
-
-        callback = function(callback)
-            fpscall = callback
-            if callback then
-                setfpscap(fps)
-            else
-                setfpscap(60)
-            end
-        end
-    })
-    tabs.Settings.create_slider({
-        name = 'FPS',
-        flag = 'fpsslider',
-
-        section = 'right',
-
-        value = 999,
-        minimum_value = 60,
-        maximum_value = 999,
-
-        callback = function(value)
-            fps = value
-            if fpscall then
-                setfpscap(value)
-            end
-        end
-    })
-end)
-
-run(function()
-    tabs.Settings.create_title({
-        name = 'Uninject',
-        section = 'left'
-    })
-
-    tabs.Settings.create_toggle({
-        name = 'Uninject',
-        flag = 'uninject',
-
-        section = 'left',
-        enabled = false,
-
-        callback = function(callback)
-            if callback then
-                task.spawn(function()
-                    interface.Flags['uninject'] = false
-    				interface.save_flags()
-    			end)
-                task.wait(0.5)
-                interface:uninject()
-            end
-        end
-    })
-end)
-
-notif('💖 lover.lua', 'Script loaded', math.random(6, 7))
+interface:init_config(window)
