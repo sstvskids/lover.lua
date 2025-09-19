@@ -82,8 +82,8 @@ end
 local function getBestSword()
     local bestItem, bestItemStrength = nil, 0
 
-    for i,v in ipairs(itemMeta['Swords']) do
-        if hasItem(v) and v[2] > bestItemStrength then
+    for i,v in ipairs(itemMeta) do
+        if hasItem(v[1]) and v[2] > bestItemStrength then
             bestItem, bestItemStrength = v[1], v[2]
         end
     end
