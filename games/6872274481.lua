@@ -376,7 +376,7 @@ run(function()
             end
         end
     })
-    tabs.Movement.create_keybind({
+    tabs.Movement.create_keybind({ -- scuffy solution but its MEH
         name = 'Flight',
         flag = 'flightkeybind',
 
