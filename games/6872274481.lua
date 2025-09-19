@@ -62,6 +62,19 @@ local function getPart(v)
     end
 end
 
+local function hasItem(item: string): string
+    if isAlive(lplr) and workspace[lplr.Name]:FindFirstChild(item) then return true end
+    
+    return false
+end
+
+local AutoTool = false
+local function spoofTool(item: string): string
+    if AutoTool == true and isAlive(lplr) and not hasItem(item) then
+        workspace[lplr.Name]:FindFirstChild('InventoryFolder').Value = item
+    end
+end
+
 run(function()
     local NetManaged = replicatedStorage.rbxts_include.node_modules['@rbxts'].net.out._NetManaged
     local BlockEngine = replicatedStorage.rbxts_include.node_modules['@easy-games']['block-engine'].node_modules['@rbxts'].net.out._NetManaged
@@ -83,6 +96,25 @@ end)
     Combat
 
 ]]
+
+run(function()
+    tabs.Combat.create_title({
+        name = 'AutoTool',
+        section = 'right'
+    })
+
+    tabs.Combat.create_toggle({
+        name = 'Speed',
+        flag = 'speed',
+
+        section = 'left',
+        enabled = false,
+
+        callback = function(callback)
+            AutoTool = callback
+        end
+    })
+end)
 
 run(function()
     print('combat | not done yet twin')
@@ -152,7 +184,7 @@ run(function()
     })
 
     local fov = 60
-    local oldfov
+    local oldfov = 60
     tabs.Settings.create_toggle({
         name = 'FOVChanger',
         flag = 'fov',
