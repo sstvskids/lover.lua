@@ -95,7 +95,7 @@ run(function()
     local NetManaged = replicatedStorage.rbxts_include.node_modules['@rbxts'].net.out._NetManaged
     local BlockEngine = replicatedStorage.rbxts_include.node_modules['@easy-games']['block-engine'].node_modules['@rbxts'].net.out._NetManaged
 
-    remotes = setmetatable({
+    remotes = {
         SwordHit = NetManaged.SwordHit,
         PickupItemDrop = NetManaged.PickupItemDrop,
         SetInvItem = NetManaged.SetInvItem,
@@ -104,7 +104,7 @@ run(function()
         SetObservedChest = NetManaged['Inventory/SetObservedChest'],
         PlaceBlock = BlockEngine.PlaceBlock,
         DamageBlock = BlockEngine.DamageBlock
-    }, nil)
+    }
 end)
 
 local AutoTool = false
