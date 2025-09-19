@@ -60,11 +60,23 @@ local remotes, tabs = {}, {
 }
 
 local function isAlive(v)
-    if workspace[v.Name] then
+    if workspace:FindFirstChild(v.Name) then
         return true
     end
 
     return false
+end
+
+local function getNearestEntity(range: number): number
+	for i,v in playersService:GetPlayers() do
+		if v == lplr or v.Team == lplr.Team or not isAlive(v) then continue end
+
+		if v.Character and v.Character.PrimaryPart then
+			if (lplr.Character.PrimaryPart.Position - v.Character.PrimaryPart.Position).Magnitude <= Range then
+				return v
+			end
+		end
+	end
 end
 
 local function hasItem(item: string)
@@ -79,12 +91,13 @@ local function getBestSword()
     local bestItem, bestItemStrength = nil, 0
 
     for i,v in ipairs(itemMeta) do
-        if hasItem(v[1]) and v[2] > bestItemStrength then
+		local item = tostring(v[1])
+        if hasItem(item) and v[2] > bestItemStrength then
             bestItem, bestItemStrength = v[1], v[2]
         end
     end
 
-    return workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(bestItem)
+    return workspace[lplr.Name].InventoryFolder.Value[bestItem]
 end
 
 run(function()
@@ -136,36 +149,37 @@ run(function()
         callback = function(callback)
             if callback then
                 interface.connections.Aura = runService.PreSimulation:Connect(function()
-                    for _, v in playersService:GetPlayers() do
-                        if isAlive(v) and v ~= lplr and (lplr.Character.PrimaryPart.Position - v.Character.PrimaryPart.Position).Magnitude <= Range then
-                            local bestTool = getBestSword()
-                            spoofTool(bestTool)
+					if isAlive(lplr) then
+						local entity = getNearestEntity(Range)
 
-                            if hasItem(bestTool) --[[and isAlive(lplr)]] then
-                                local targetPos = v.Character.PrimaryPart.Position
-                                local selfpos = lplr.Character.PrimaryPart.Position
+						if entity then
+							local bestTool = getBestSword()
+							spoofTool(bestTool.Name)
 
-                                local delta = (targetPos - selfpos)
-                                local dir = CFrame.lookAt(selfpos, targetPos).LookVector
-                                local pos = selfpos + dir * math.max(delta.Magnitude - 14.399, 0)
+							if hasItem(bestTool.Name) then
+								local targetPos = entity.Character.PrimaryPart.Position
+								local selfpos = lplr.Character.PrimaryPart.Position
 
-                                remotes.SwordHit:FireServer({
-                                    chargedAttack = {chargeRatio = 0},
-                                    entityInstance = v.Character,
-                                    weapon = bestTool,
-                                    validate = {
-                                        targetPosition = {
-                                            value = targetPos
-                                        },
-                                        selfPosition = {
-                                            value = pos
-                                        },
-                                    }
-                                })
-                                print('ok')
-                            end
-                        end
-                    end
+								local delta = (targetPos - selfpos)
+								local dir = CFrame.lookAt(selfpos, targetPos).LookVector
+								local pos = selfpos + dir * math.max(delta.Magnitude - 14.399, 0)
+
+								remotes.SwordHit:FireServer({
+									chargedAttack = {chargeRatio = 0},
+									entityInstance = entity.Character,
+									weapon = bestTool,
+									validate = {
+										raycast = {
+											cameraPosition = {value = pos},
+											cursorDirection = {value = dir}
+										},
+										targetPosition = {value = targetPos},
+										selfPosition = {value = pos}
+									}
+								})
+							end
+						end
+					end
                 end)
             else
                 if interface.connections.Aura then
@@ -384,3 +398,5 @@ run(function()
         end
     })
 end)
+
+notif('💖 lover.lua', 'Script loaded', math.random(6, 7))
