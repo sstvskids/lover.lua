@@ -79,10 +79,10 @@ local function hasItem(item: string): string
     return false
 end
 
-local function getBestTool(type: string): string
+local function getBestSword()
     local bestItem, bestItemStrength = nil, 0
 
-    for i,v in ipairs(itemMeta[type]) do
+    for i,v in ipairs(itemMeta['Swords']) do
         if hasItem(v) and v[2] > bestItemStrength then
             bestItem, bestItemStrength = v[1], v[2]
         end
@@ -169,7 +169,7 @@ run(function()
                     task.spawn(function()
                         for _, v in playersService:GetPlayers() do
                             if v ~= lplr and isAlive(v) and (getPart(lplr).Position - getPart(v).Position).Magnitude <= Range then
-                                local bestTool = getBestTool('Swords')
+                                local bestTool = getBestSword()
 
                                 if hasItem(bestTool) then
                                     attackPlr(v, bestTool)
