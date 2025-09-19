@@ -84,7 +84,7 @@ local function getBestSword()
         end
     end
 
-    return bestItem
+    return workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(bestItem)
 end
 
 run(function()
@@ -143,8 +143,12 @@ run(function()
 
                             if hasItem(bestTool) --[[and isAlive(lplr)]] then
                                 local targetPos = v.Character.PrimaryPart.Position
+                                local selfpos = lplr.Character.PrimaryPart.Position
 
-                                print('fired fr')
+                                local delta = (targetPos - selfpos)
+                                local dir = CFrame.lookAt(selfpos, targetPos).LookVector
+                                local pos = selfpos + dir * math.max(delta.Magnitude - 14.399, 0)
+
                                 remotes.SwordHit:FireServer({
                                     chargedAttack = {chargeRatio = 0},
                                     entityInstance = v.Character,
@@ -154,7 +158,7 @@ run(function()
                                             value = targetPos
                                         },
                                         selfPosition = {
-                                            value = lplr.Character.PrimaryPart.Position
+                                            value = pos
                                         },
                                     }
                                 })
