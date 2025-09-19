@@ -167,6 +167,7 @@ end)
 run(function()
     local Aura
     local Range = 18
+    local Face = false
     tabs.Combat.create_title({
         name = 'Aura',
         section = 'right'
@@ -196,6 +197,11 @@ run(function()
 								local delta = (targetPos - selfpos)
 								local dir = CFrame.lookAt(selfpos, targetPos).LookVector
 								local pos = selfpos + dir * math.max(delta.Magnitude - 14.399, 0)
+
+                                if Face then
+						            local vec = entity.Character.PrimaryPart.Position * Vector3.new(1, 0, 1)
+						            lplr.Character.PrimaryPart.CFrame = CFrame.lookAt(lplr.Character.PrimaryPart.Position, Vector3.new(vec.X, lplr.Character.HumanoidRootPart.Position.Y + 0.001, vec.Z))
+                                end
 
 								remotes.SwordHit:FireServer({
 									chargedAttack = {chargeRatio = 0},
@@ -233,6 +239,17 @@ run(function()
 
         callback = function(val)
             Range = val
+        end
+    })
+    tabs.Combat.create_toggle({
+        name = 'Face',
+        flag = 'auraface',
+
+        section = 'right',
+        enabled = false,
+
+        callback = function(callback)
+            Face = callback
         end
     })
 end)
