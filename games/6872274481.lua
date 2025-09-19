@@ -72,7 +72,7 @@ local function getNearestEntity(range: number): number
 		if v == lplr or v.Team == lplr.Team or not isAlive(v) then continue end
 
 		if v.Character and v.Character.PrimaryPart then
-			if (lplr.Character.PrimaryPart.Position - v.Character.PrimaryPart.Position).Magnitude <= Range then
+			if (lplr.Character.PrimaryPart.Position - v.Character.PrimaryPart.Position).Magnitude <= range then
 				return v
 			end
 		end
