@@ -378,9 +378,22 @@ run(function()
     })
     tabs.Movement.create_keybind({
         name = 'Flight',
-        flag = 'flight',
+        flag = 'flightkeybind',
 
-        section = 'right'
+        section = 'right',
+        keycode = Enum.KeyCode.R,
+
+        callback = function()
+            interface.Flags['flight'] = interface.Flags['flight']
+			interface.save_flags()
+
+			tabs.Movement.update_toggle({
+				state = interface.Flags['flight'],
+				toggle = interface.Toggles['flight']
+			})
+
+			interface.Toggles['flight'].callback(interface.Flags['flight'])
+        end
     })
 end)
 
