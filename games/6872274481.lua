@@ -34,18 +34,15 @@ local playersService = cloneref(game:GetService('Players'))
 local starterGui = cloneref(game:GetService('StarterGui'))
 local replicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
 local runService = cloneref(game:GetService('RunService'))
+local inputService = cloneref(game:GetService('UserInputService'))
 local lplr = playersService.LocalPlayer
 
-local notif = function(title, txt, dur, buttons)
+local notif = function(title, txt, dur)
     local packet = {
         Title = title,
         Text = txt,
         Duration = dur
     }
-
-    for i,v in buttons do
-        packet[i] = v
-    end
 
     starterGui:SetCore('SendNotification', packet)
 end
@@ -273,10 +270,6 @@ run(function()
     })
 end)
 
-run(function()
-    print('combat | not done yet twin')
-end)
-
 --[[
 
     Movement
@@ -327,6 +320,77 @@ run(function()
         end
     })
 end)
+
+run(function()
+    local FlyVal = 0
+    tabs.Movement.create_title({
+        name = 'Flight',
+        section = 'right'
+    })
+
+    tabs.Movement.create_toggle({
+        name = 'Flight',
+        flag = 'flight',
+
+        section = 'right',
+        enabled = false,
+
+        callback = function(callback)
+            if callback then
+                interface.connections.FlightUp = inputService.InputBegan:Connect(function(input)
+					if not inputService:GetFocusedTextBox() then
+						if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
+							FlyVal = 44
+						elseif input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.ButtonL2 then
+							FlyVal = -44
+						end
+					end
+				end)
+				interface.connections.FlightDown = inputService.InputEnded:Connect(function(input)
+					if not inputService:GetFocusedTextBox() then
+						if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
+							FlyVal = 0
+						elseif input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.ButtonL2 then
+							FlyVal = 0
+						end
+					end
+				end)
+
+                interface.connections.Flight = runService.RenderStepped:Connect(function()
+                    if isAlive(lplr) then
+                        lplr.Character.PrimaryPart.Velocity = Vector3.new(lplr.Character.PrimaryPart.Velocity.X, FlyVal, lplr.Character.PrimaryPart.Velocity.Z)
+                    end
+                end)
+            else
+                if interface.connections.Flight then
+                    interface.connections.Flight:Disconnect()
+                end
+
+                if interface.connections.FlightUp then
+                    interface.connections.FlightUp:Disconnect()
+                end
+
+                if interface.connections.FlightDown then
+                    interface.connections.FlightDown:Disconnect()
+                end
+            end
+        end
+    })
+    tabs.Movement.create_keybind({
+        name = 'Flight',
+        flag = 'flight',
+
+        section = 'right'
+    })
+end)
+
+--[[
+
+    Render
+
+]]
+
+print('real render')
 
 --[[
 
