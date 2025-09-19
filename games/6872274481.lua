@@ -370,8 +370,10 @@ run(function()
 
         callback = function(callback)
             if callback then
-                interface.Flags['uninject'] = false
-				interface.save_flags()
+                task.spawn(function()
+                    interface.Flags['uninject'] = false
+    				interface.save_flags()
+    			end)
                 task.wait(0.5)
                 interface:uninject()
             end
