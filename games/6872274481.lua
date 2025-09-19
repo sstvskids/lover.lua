@@ -78,6 +78,22 @@ run(function()
     }, nil)
 end)
 
+--[[
+
+    Combat
+
+]]
+
+run(function()
+    print('combat | not done yet twin')
+end)
+
+--[[
+
+    Movement
+
+]]
+
 run(function()
     local Value
     tabs.Movement.create_title({
@@ -122,6 +138,12 @@ run(function()
         end
     })
 end)
+
+--[[
+
+    Settings
+
+]]
 
 run(function()
     tabs.Settings.create_title({
