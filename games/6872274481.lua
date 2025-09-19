@@ -79,22 +79,16 @@ local function hasItem(item: string): string
     return false
 end
 
-local AutoTool = false
-local function spoofTool(item: string): string
-    if AutoTool == true and isAlive(lplr) and not hasItem(item) then
-        workspace[lplr.Name]:FindFirstChild('HandInvItem').Value = item
-    end
-
-    return workspace[lplr.Name]:FindFirstChild('HandInvItem').Value
-end
-
 local function getBestTool(type: string): string
     local bestItem, bestItemStrength = nil, 0
 
     for i,v in ipairs(itemMeta[type]) do
-        print(i,v)
-        print(v[1], v[2])
+        if hasItem(v) and v[2] > bestItemStrength then
+            bestItem, bestItemStrength = v[1], v[2]
+        end
     end
+
+    return bestItem
 end
 
 run(function()
@@ -113,6 +107,15 @@ run(function()
     }, nil)
 end)
 
+local AutoTool = false
+local function spoofTool(item: string): string
+    if AutoTool == true and isAlive(lplr) and not hasItem(item) then
+        remotes.SetInvItem:InvokeServer({
+			['hand'] = item
+		})
+    end
+end
+
 local function attackPlr(plr, weapon)
     local targetPos = plr.Character.PrimaryPart.Position
 
@@ -121,11 +124,9 @@ local function attackPlr(plr, weapon)
 	local pos = lplr.Character.PrimaryPart.Position + dir * math.max(delta.Magnitude - 14.39999, 0)
 
     plr.SwordHit:FireServer({
-        chargedAttack = {
-            chargeRatio = 0
-        },
+        chargedAttack = {chargeRatio = 0},
         entityInstance = plr.Character,
-        weapon = workspace[lplr.Name]:FindFirstChild('HandInvItem').Value,
+        weapon = weapon,
         validate = {
             raycast = {
 				cameraPosition = {value = pos},
@@ -146,6 +147,61 @@ end
     Combat
 
 ]]
+
+run(function()
+    local Aura
+    local Range
+    tabs.Combat.create_title({
+        name = 'Aura',
+        section = 'left'
+    })
+
+    tabs.Combat.create_toggle({
+        name = 'Aura',
+        flag = 'aura',
+
+        section = 'left',
+        enabled = false,
+
+        callback = function(callback)
+            if callback then
+                interface.connections.Aura = runService.PreSimulation:Connect(function()
+                    task.spawn(function()
+                        for _, v in playersService:GetPlayers() do
+                            if v ~= lplr and isAlive(v) and (getPart(lplr).Position - getPart(v).Position).Magnitude <= Range then
+                                local bestTool = getBestTool('Swords')
+
+                                if hasItem(bestTool) then
+                                    attackPlr(v, bestTool)
+                                else
+                                    spoofTool(bestTool)
+                                end
+                            end
+                        end
+                    end)
+                end)
+            else
+                if interface.connections.Aura then
+                    interface.connections.Aura:Disconnect()
+                end
+            end
+        end
+    })
+    tabs.Combat.create_slider({
+        name = 'Range',
+        flag = 'rangeslider',
+
+        section = 'left',
+
+        value = 18,
+        minimum_value = 1,
+        maximum_value = 18,
+
+        callback = function(val)
+            Range = val
+        end
+    })
+end)
 
 run(function()
     tabs.Combat.create_title({
