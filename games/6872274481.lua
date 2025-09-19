@@ -68,12 +68,8 @@ local function isAlive(v)
 end
 
 local function hasItem(item: string)
-    if isAlive(lplr) then
-        for i,v in workspace[lplr.Name].InventoryFolder.Value:GetChildren() do
-            if v.Name:lower():find(item:lower()) then
-                return true
-            end
-        end
+    if isAlive(lplr) and workspace[lplr.Name]:FindFirstChild(item) then
+        return true
     end
 
     return false
@@ -116,36 +112,6 @@ local function spoofTool(item: string): string
     end
 end
 
-function attackEntity(Entity: any, Weapon: any)
-    local targetPos = Entity.Character.PrimaryPart.Position
-    local selfpos = lplr.Character.PrimaryPart.Position
-
-    local delta = (targetPos - selfpos)
-    local dir = CFrame.lookAt(selfpos, targetPos).LookVector
-	local pos = selfpos + dir * math.max(delta.Magnitude - 14.39999, 0)
-    remotes.SwordHit:FireServer({
-        chargedAttack = {
-            chargeRatio = 0
-        },
-        entityInstance = Entity.Character,
-        weapon = Weapon,
-        validate = {
-            raycast = {
-				cameraPosition = {value = pos},
-				cursorDirection = {value = dir}
-			},
-            targetPosition = {
-                value = targetPos
-            },
-            selfPosition = {
-                value = pos
-            },
-        }
-    })
-    
-    return "Succesfully sent"
-end
-
 --[[
 
     Combat
@@ -175,10 +141,24 @@ run(function()
                             local bestTool = getBestSword()
                             spoofTool(bestTool)
 
-                            print(bestTool)
-                            print(hasItem(bestTool))
                             if hasItem(bestTool) --[[and isAlive(lplr)]] then
-                                attackEntity(v, bestTool)
+                                local targetPos = v.Character.PrimaryPart.Position
+
+                                print('fired fr')
+                                remotes.SwordHit:FireServer({
+                                    chargedAttack = {chargeRatio = 0},
+                                    entityInstance = v.Character,
+                                    weapon = bestTool,
+                                    validate = {
+                                        targetPosition = {
+                                            value = targetPos
+                                        },
+                                        selfPosition = {
+                                            value = lplr.Character.PrimaryPart.Position
+                                        },
+                                    }
+                                })
+                                print('ok')
                             end
                         end
                     end
