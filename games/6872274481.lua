@@ -97,7 +97,7 @@ local function getBestSword()
         end
     end
 
-    return workspace[lplr.Name].InventoryFolder.Value[bestItem]
+    return workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(bestItem)
 end
 
 run(function()
