@@ -132,18 +132,51 @@ end
 ]]
 
 run(function()
+    tabs.Combat.create_title({
+        name = 'Knockback',
+        section = 'left'
+    })
+
+    tabs.Combat.create_toggle({
+        name = 'Velocity',
+        flag = 'velocity',
+
+        section = 'left',
+        enabled = false,
+
+        callback = function(callback)
+            if callback then
+                local lastHP = lplr.Character.Humanoid.Health
+                interface.connections.Velocity = runService.RenderStepped:Connect(function()
+                    if isAlive(lplr) then
+                        if lplr.Character.Humanoid.Health < lastHP then
+                            lplr.Character.PrimaryPart.Velocity = Vector3.zero
+                        end
+                        lastHP = lplr.Character.Humanoid.Health
+                    end
+                end)
+            else
+                if interface.connections.Velocity then
+                    interface.connections.Velocity:Disconnect()
+                end
+            end
+        end,
+    })
+end)
+
+run(function()
     local Aura
     local Range = 18
     tabs.Combat.create_title({
         name = 'Aura',
-        section = 'left'
+        section = 'right'
     })
 
     tabs.Combat.create_toggle({
         name = 'Aura',
         flag = 'aura',
 
-        section = 'left',
+        section = 'right',
         enabled = false,
 
         callback = function(callback)
@@ -192,7 +225,7 @@ run(function()
         name = 'Range',
         flag = 'rangeslider',
 
-        section = 'left',
+        section = 'right',
 
         value = 18,
         minimum_value = 1,
@@ -207,14 +240,14 @@ end)
 run(function()
     tabs.Combat.create_title({
         name = 'AutoTool',
-        section = 'right'
+        section = 'left'
     })
 
     tabs.Combat.create_toggle({
         name = 'AutoTool',
         flag = 'autotool',
 
-        section = 'right',
+        section = 'left',
         enabled = false,
 
         callback = function(callback)
