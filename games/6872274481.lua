@@ -67,9 +67,13 @@ local function isAlive(v)
     return false
 end
 
-local function hasItem(item: string): string
-    if isAlive(lplr) and workspace[lplr.Name].HandInvItem.Value == item then return true end
-    
+local function hasItem(item: string)
+    for i,v in workspace[lplr.Name].InventoryFolder.Value:GetChildren() do
+        if v.Name:lower():find(item:lower()) then
+            return true
+        end
+    end
+
     return false
 end
 
