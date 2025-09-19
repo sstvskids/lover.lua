@@ -67,12 +67,6 @@ local function isAlive(v)
     return false
 end
 
-local function getPart(v)
-    if isAlive(v) then
-        return v.Character.PrimaryPart
-    end
-end
-
 local function hasItem(item: string): string
     if isAlive(lplr) and workspace[lplr.Name]:FindFirstChild(item) then return true end
     
@@ -167,12 +161,34 @@ run(function()
             if callback then
                 interface.connections.Aura = runService.PreSimulation:Connect(function()
                     for _, v in playersService:GetPlayers() do
-                        if isAlive(v) and v ~= lplr and (getPart(lplr).Position - getPart(v).Position).Magnitude <= Range then
+                        if isAlive(v) and v ~= lplr and (lplr.Character.PrimaryPart.Position - v.Character.PrimaryPart.Position).Magnitude <= Range then
                             local bestTool = getBestSword()
                             spoofTool(bestTool)
 
                             if hasItem(bestTool) and isAlive(lplr) then
-                                attackPlr(v, bestTool)
+                                local targetPos = v.Character.PrimaryPart.Position
+
+                                local delta = (targetPos - lplr.Character.PrimaryPart.Position)
+                                local dir = CFrame.lookAt(lplr.Character.PrimaryPart.Position, targetPos).LookVector
+                                local pos = lplr.Character.PrimaryPart.Position + dir * math.max(delta.Magnitude - 14.3999, 0)
+
+                                remotes.SwordHit:FireServer({
+                                    chargedAttack = {chargeRatio = 0},
+                                    entityInstance = v.Character,
+                                    weapon = bestTool,
+                                    validate = {
+                                        raycast = {
+                                            cameraPosition = {value = pos},
+                                            cursorDirection = {value = dir}
+                                        },
+                                        targetPosition = {
+                                            value = targetPos
+                                        },
+                                        selfPosition = {
+                                            value = pos
+                                        },
+                                    }
+                                })
                             end
                         end
                     end
