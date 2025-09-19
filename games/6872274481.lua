@@ -16,7 +16,18 @@ local cloneref = cloneref or function(obj)
     return obj
 end
 
+local function downloadFile(file)
+    url = file:gsub('lover.lua/', '')
+    if not isfile(file) then
+        writefile(file, game:HttpGet('https://raw.githubusercontent.com/sstvskids/lover.lua/'..readfile('lover.lua/commit.txt')..'/'..url))
+    end
+
+    repeat task.wait() until isfile(file)
+    return readfile(file)
+end
+
 local interface = loadstring(readfile('lover.lua/interface/interface.lua'))()
+local itemMeta = loadstring(downloadFile('lover.lua/libraries/meta.lua'))()
 
 -- Services :)
 local playersService = cloneref(game:GetService('Players'))
@@ -71,7 +82,18 @@ end
 local AutoTool = false
 local function spoofTool(item: string): string
     if AutoTool == true and isAlive(lplr) and not hasItem(item) then
-        workspace[lplr.Name]:FindFirstChild('InventoryFolder').Value = item
+        workspace[lplr.Name]:FindFirstChild('HandInvItem').Value = item
+    end
+
+    return workspace[lplr.Name]:FindFirstChild('HandInvItem').Value
+end
+
+local function getBestTool(type: string): string
+    local bestItem, bestItemStrength = nil, 0
+
+    for i,v in ipairs(itemMeta[type]) do
+        print(i,v)
+        print(v[1], v[2])
     end
 end
 
@@ -91,6 +113,34 @@ run(function()
     }, nil)
 end)
 
+local function attackPlr(plr, weapon)
+    local targetPos = plr.Character.PrimaryPart.Position
+
+    local delta = (targetPos - lplr.Character.PrimaryPart.Position)
+    local dir = CFrame.lookAt(lplr.Character.PrimaryPart.Position, targetPos).LookVector
+	local pos = lplr.Character.PrimaryPart.Position + dir * math.max(delta.Magnitude - 14.39999, 0)
+
+    plr.SwordHit:FireServer({
+        chargedAttack = {
+            chargeRatio = 0
+        },
+        entityInstance = plr.Character,
+        weapon = workspace[lplr.Name]:FindFirstChild('HandInvItem').Value,
+        validate = {
+            raycast = {
+				cameraPosition = {value = pos},
+				cursorDirection = {value = dir}
+			},
+            targetPosition = {
+                value = targetPos
+            },
+            selfPosition = {
+                value = pos
+            },
+        }
+    })
+end
+
 --[[
 
     Combat
@@ -104,10 +154,10 @@ run(function()
     })
 
     tabs.Combat.create_toggle({
-        name = 'Speed',
-        flag = 'speed',
+        name = 'AutoTool',
+        flag = 'autotool',
 
-        section = 'left',
+        section = 'right',
         enabled = false,
 
         callback = function(callback)
