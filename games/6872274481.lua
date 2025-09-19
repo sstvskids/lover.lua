@@ -171,7 +171,7 @@ run(function()
                             local bestTool = getBestSword()
                             spoofTool(bestTool)
 
-                            if hasItem(bestTool) then
+                            if hasItem(bestTool) and isAlive(lplr) then
                                 attackPlr(v, bestTool)
                             end
                         end
