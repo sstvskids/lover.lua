@@ -337,6 +337,7 @@ run(function()
 
         callback = function(callback)
             if callback then
+                FlyVal = 0
                 interface.connections.FlightUp = inputService.InputBegan:Connect(function(input)
 					if not inputService:GetFocusedTextBox() then
 						if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
@@ -374,25 +375,6 @@ run(function()
                     interface.connections.FlightDown:Disconnect()
                 end
             end
-        end
-    })
-    tabs.Movement.create_keybind({ -- scuffy solution but its MEH
-        name = 'Flight',
-        flag = 'flightkeybind',
-
-        section = 'right',
-        keycode = Enum.KeyCode.R,
-
-        callback = function()
-            interface.Flags['flight'] = interface.Flags['flight']
-			interface.save_flags()
-
-			tabs.Movement.update_toggle({
-				state = interface.Flags['flight'],
-				toggle = interface.Toggles['flight']
-			})
-
-			interface.Toggles['flight'].callback(interface.Flags['flight'])
         end
     })
 end)
