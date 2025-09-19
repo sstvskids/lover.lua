@@ -123,7 +123,7 @@ local function attackPlr(plr, weapon)
     local dir = CFrame.lookAt(lplr.Character.PrimaryPart.Position, targetPos).LookVector
 	local pos = lplr.Character.PrimaryPart.Position + dir * math.max(delta.Magnitude - 14.3999, 0)
 
-    plr.SwordHit:FireServer({
+    remotes.SwordHit:FireServer({
         chargedAttack = {chargeRatio = 0},
         entityInstance = plr.Character,
         weapon = weapon,
