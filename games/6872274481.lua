@@ -339,3 +339,5 @@ run(function()
         end
     })
 end)
+
+getBestTool('Swords')
