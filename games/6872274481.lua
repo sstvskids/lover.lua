@@ -43,6 +43,7 @@ local starterGui = cloneref(game:GetService('StarterGui'))
 local replicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
 local runService = cloneref(game:GetService('RunService'))
 local inputService = cloneref(game:GetService('UserInputService'))
+local collectionService = cloneref(game:GetService('CollectionService'))
 local lplr = playersService.LocalPlayer
 
 local objs = {
@@ -84,6 +85,27 @@ local function getNearestEntity(entitytype: string, range: number): any?
 				end
 			end
 		end
+
+		for i,v in collectionService:GetTagged('entity') do
+			if v:HasTag('inventory-entity') and not v:HasTag('Monster') then
+				continue
+			elseif v:HasTag('Drone') then
+				if v.PrimaryPart then
+					local realplr = playersService:GetPlayerByUserId(v:GetAttribute('PlayerUserId'))
+					if realplr.Team == lplr.Team then continue end
+
+					if (lplr.Character.PrimaryPart.Position - v.PrimaryPart.Position).Magnitude <= range then
+						return v
+					end
+				end
+			end
+
+			if v.PrimaryPart then
+				if (lplr.Character.PrimaryPart.Position - v.PrimaryPart.Position).Magnitude <= range then
+					return v
+				end
+			end
+		end
 	elseif entitytype == 'Chests' then
 		for i,v in objs.chests do
 			if (lplr.Character.PrimaryPart.Position - v.Position).Magnitude <= range then
@@ -113,7 +135,7 @@ local function getBestSword()
         end
     end
 
-    return workspace:FindFirstChild(lplr.Name).InventoryFolder.Value:FindFirstChild(bestItem)
+    return workspace:FindFirstChild(lplr.Name):FindFirstChild('InventoryFolder').Value:FindFirstChild(bestItem)
 end
 
 local remotes
@@ -189,6 +211,8 @@ run(function()
 
 	knockback:toggle({
 		name = 'FPS',
+		info = 'Unlocks your FPS cap',
+
 		seperator = true,
 		callback = function(callback)
 			setfpscap(callback and FPS or 60)
@@ -216,6 +240,10 @@ run(function()
 		default = true
 	})
 
+	local function roundPos(pos)
+		return math.round(math.abs(pos))
+	end
+
 	section:toggle({
 		name = 'Aura',
 		info = 'Attacks players around you',
@@ -235,26 +263,37 @@ run(function()
 							end
 
 							if hasItem(bestTool.Name) and isAlive(entity) then
-								local targetPos = entity.Character.PrimaryPart.Position
-								local selfpos = (lplr.Character.PrimaryPart.Position + lplr.Character.Humanoid.MoveDirection)
-                                local pos = Vector3.new(math.round(math.abs(selfpos.X)), math.round(math.abs(selfpos.Y)), math.round(math.abs(selfpos.Z)))
+								local targetPos, inst, selfpos
+								if entity:IsA('Player') then
+									targetPos = entity.Character.PrimaryPart.Position
+									selfpos = (lplr.Character.PrimaryPart.Position + entity.Character.Humanoid.MoveDirection)
+									inst = entity.Character
+								else
+									targetPos = entity.PrimaryPart.Position
+									selfpos = (lplr.Character.PrimaryPart.Position + entity.Humanoid.MoveDirection)
+									inst = entity
+								end
+
+								local pos = Vector3.new(roundPos(selfpos.X), roundPos(selfpos.Y), roundPos(selfpos.Z))
 
                                 if Face then
 						            lplr.Character.PrimaryPart.CFrame = CFrame.lookAt(lplr.Character.PrimaryPart.Position, Vector3.new(targetPos.X, lplr.Character.HumanoidRootPart.Position.Y + 0.001, targetPos.Z))
                                 end
 
-								remotes.SwordHit:FireServer({
-									chargedAttack = {chargeRatio = 0},
-									entityInstance = entity.Character,
-									weapon = bestTool,
-									validate = {
-										raycast = {
-											cameraPosition = {value = pos}
-										},
-										targetPosition = {value = targetPos},
-										selfPosition = {value = pos}
-									}
-								})
+								task.spawn(function()
+									remotes.SwordHit:FireServer({
+										chargedAttack = {chargeRatio = 0},
+										entityInstance = inst,
+										weapon = bestTool,
+										validate = {
+											raycast = {
+												cameraPosition = {value = pos}
+											},
+											targetPosition = {value = targetPos},
+											selfPosition = {value = pos}
+										}
+									})
+								end)
 							end
 						end
 					end
@@ -444,6 +483,8 @@ run(function()
 
 	FOV:toggle({
 		name = 'FOV',
+		info = 'Changes your field of view',
+
 		seperator = true,
 		callback = function(callback)
 			if callback then
@@ -496,6 +537,8 @@ run(function()
 
 	Stealer:toggle({
 		name = 'Stealer',
+		info = 'Automatically steals from chests',
+
 		seperator = true,
 		callback = function(callback)
 			if callback then
@@ -537,14 +580,16 @@ run(function()
 		end
 	})
 
-	local Tool = column:section({
+	local column2 = self_section3:column({})
+
+	local Tool = column2:section({
 		name = 'Tool',
 		default = true
 	})
 
 	Tool:toggle({
 		name = 'AutoTool',
-		info = 'Automatically switches your tool',
+		info = 'Automatically switches tools when needed',
 
 		seperator = true,
 		callback = function(callback)
