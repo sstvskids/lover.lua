@@ -240,6 +240,10 @@ run(function()
 		default = true
 	})
 
+	local function roundPos(pos)
+		return math.round(math.abs(pos))
+	end
+
 	section:toggle({
 		name = 'Aura',
 		info = 'Attacks players around you',
@@ -270,7 +274,7 @@ run(function()
 									inst = entity
 								end
 
-								local pos = Vector3.new(math.round(math.abs(selfpos.X)), math.round(math.abs(selfpos.Y)), math.round(math.abs(selfpos.Z)))
+								local pos = Vector3.new(roundPos(selfpos.X), roundPos(selfpos.Y), roundPos(selfpos.Z))
                                 if Face then
 						            lplr.Character.PrimaryPart.CFrame = CFrame.lookAt(lplr.Character.PrimaryPart.Position, Vector3.new(targetPos.X, lplr.Character.HumanoidRootPart.Position.Y + 0.001, targetPos.Z))
                                 end
