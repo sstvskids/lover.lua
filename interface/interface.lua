@@ -3577,7 +3577,7 @@
                     library:update_config_list()
                     library:create_notification({
                         name = "Configs",
-                        info = "Loaded lover.lua config"
+                        info = "Loaded lover.lua"
                     })
                 end
             })
