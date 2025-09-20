@@ -252,51 +252,53 @@ run(function()
 		callback = function(callback)
             if callback then
                 AuraConn = runService.PreSimulation:Connect(function()
-					if isAlive(lplr) then
-						local entity = getNearestEntity('Players', Range)
+					task.spawn(function()
+						if isAlive(lplr) then
+							local entity = getNearestEntity('Players', Range)
 
-						if entity then
-							local bestTool = getBestSword()
+							if entity then
+								local bestTool = getBestSword()
 
-							if bestTool then
-								spoofTool(bestTool.Name)
-							end
-
-							if hasItem(bestTool.Name) and isAlive(entity) then
-								local targetPos, inst, selfpos
-								if entity:IsA('Player') then
-									targetPos = entity.Character.PrimaryPart.Position
-									selfpos = (lplr.Character.PrimaryPart.Position + entity.Character.Humanoid.MoveDirection)
-									inst = entity.Character
-								else
-									targetPos = entity.PrimaryPart.Position
-									selfpos = (lplr.Character.PrimaryPart.Position + entity.Humanoid.MoveDirection)
-									inst = entity
+								if bestTool then
+									spoofTool(bestTool.Name)
 								end
 
-								local pos = Vector3.new(roundPos(selfpos.X), roundPos(selfpos.Y), roundPos(selfpos.Z))
+								if hasItem(bestTool.Name) and isAlive(entity) then
+									local targetPos, inst, selfpos
+									if entity:IsA('Player') then
+										targetPos = entity.Character.PrimaryPart.Position
+										selfpos = (lplr.Character.PrimaryPart.Position + entity.Character.Humanoid.MoveDirection)
+										inst = entity.Character
+									else
+										targetPos = entity.PrimaryPart.Position
+										selfpos = (lplr.Character.PrimaryPart.Position + entity.Humanoid.MoveDirection)
+										inst = entity
+									end
 
-                                if Face then
-						            lplr.Character.PrimaryPart.CFrame = CFrame.lookAt(lplr.Character.PrimaryPart.Position, Vector3.new(targetPos.X, lplr.Character.HumanoidRootPart.Position.Y + 0.001, targetPos.Z))
-                                end
+									local pos = Vector3.new(roundPos(selfpos.X), roundPos(selfpos.Y), roundPos(selfpos.Z))
 
-								task.spawn(function()
-									remotes.SwordHit:FireServer({
-										chargedAttack = {chargeRatio = 0},
-										entityInstance = inst,
-										weapon = bestTool,
-										validate = {
-											raycast = {
-												cameraPosition = {value = pos}
-											},
-											targetPosition = {value = targetPos},
-											selfPosition = {value = pos}
-										}
-									})
-								end)
+									if Face then
+										lplr.Character.PrimaryPart.CFrame = CFrame.lookAt(lplr.Character.PrimaryPart.Position, Vector3.new(targetPos.X, lplr.Character.HumanoidRootPart.Position.Y + 0.001, targetPos.Z))
+									end
+
+									task.spawn(function()
+										remotes.SwordHit:FireServer({
+											chargedAttack = {chargeRatio = 0},
+											entityInstance = inst,
+											weapon = bestTool,
+											validate = {
+												raycast = {
+													cameraPosition = {value = pos}
+												},
+												targetPosition = {value = targetPos},
+												selfPosition = {value = pos}
+											}
+										})
+									end)
+								end
 							end
 						end
-					end
+					end)
                 end)
             else
                 if AuraConn then
@@ -436,17 +438,19 @@ run(function()
                     end
                 end)
 			else
-                if Flight then
-                    Flight:Disconnect()
-                end
+				task.spawn(function()
+					if Flight then
+						Flight:Disconnect()
+					end
 
-                if FlightUp then
-                    FlightUp:Disconnect()
-                end
+					if FlightUp then
+						FlightUp:Disconnect()
+					end
 
-                if FlightDown then
-                    FlightDown:Disconnect()
-                end
+					if FlightDown then
+						FlightDown:Disconnect()
+					end
+				end)
 			end
 		end
 	})
