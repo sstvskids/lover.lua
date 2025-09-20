@@ -45,6 +45,18 @@ local runService = cloneref(game:GetService('RunService'))
 local inputService = cloneref(game:GetService('UserInputService'))
 local lplr = playersService.LocalPlayer
 
+local objs = {
+	chests = {},
+	beds = {}
+}
+
+task.delay(2, function()
+	for _, v in workspace:GetChildren() do
+		if v.Name == 'chest' then table.insert(objs.chests, v) end
+		if v.Name == 'bed' then table.insert(objs.beds, v) end
+	end
+end)
+
 local window = interface:window({
 	name = 'lover',
 	suffix = '.lua',
@@ -59,16 +71,28 @@ local function isAlive(v)
     return false
 end
 
-local function getNearestEntity(range: number): number
-	for i,v in playersService:GetPlayers() do
-		if v == lplr or v.Team == lplr.Team or not isAlive(v) then continue end
+local function getNearestEntity(entitytype: string, range: number): any?
+	if not isAlive(lplr) then return nil end
 
-		if v.Character and v.Character.PrimaryPart then
-			if (lplr.Character.PrimaryPart.Position - v.Character.PrimaryPart.Position).Magnitude <= range then
+	if entitytype == 'Players' then
+		for i,v in playersService:GetPlayers() do
+			if v == lplr or v.Team == lplr.Team or not isAlive(v) then continue end
+
+			if v.Character and v.Character.PrimaryPart then
+				if (lplr.Character.PrimaryPart.Position - v.Character.PrimaryPart.Position).Magnitude <= range then
+					return v
+				end
+			end
+		end
+	elseif entitytype == 'Chests' then
+		for i,v in objs.chests do
+			if (lplr.Character.PrimaryPart.Position - v.Position).Magnitude <= range then
 				return v
 			end
 		end
 	end
+
+	return nil
 end
 
 local function hasItem(item: string)
@@ -113,7 +137,7 @@ local AutoTool = false
 local function spoofTool(item: string): string
     if AutoTool == true and isAlive(lplr) and not hasItem(item) then
         remotes.SetInvItem:InvokeServer({
-			['hand'] = workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(item)
+			hand = workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(item)
 		})
     end
 end
@@ -225,23 +249,22 @@ run(function()
             if callback then
                 AuraConn = runService.PreSimulation:Connect(function()
 					if isAlive(lplr) then
-						local entity = getNearestEntity(Range)
+						local entity = getNearestEntity('Players', Range)
 
 						if entity then
 							local bestTool = getBestSword()
-							spoofTool(bestTool.Name)
 
-							if hasItem(bestTool.Name) then
+							if bestTool then
+								spoofTool(bestTool.Name)
+							end
+
+							if hasItem(bestTool.Name) and isAlive(entity) then
 								local targetPos = entity.Character.PrimaryPart.Position
-								local selfpos = lplr.Character.PrimaryPart.Position
-
-								local delta = (targetPos - selfpos)
-								local dir = CFrame.lookAt(selfpos, targetPos).LookVector
-								local pos = selfpos + dir * math.max(delta.Magnitude - 14.399, 0)
+								local selfpos = (lplr.Character.PrimaryPart.Position + lplr.Character.Humanoid.MoveDirection)
+                                local pos = Vector3.new(math.round(math.abs(selfpos.X)), math.round(math.abs(selfpos.Y)), math.round(math.abs(selfpos.Z)))
 
                                 if Face then
-						            local vec = entity.Character.PrimaryPart.Position * Vector3.new(1, 0, 1)
-						            lplr.Character.PrimaryPart.CFrame = CFrame.lookAt(lplr.Character.PrimaryPart.Position, Vector3.new(vec.X, lplr.Character.HumanoidRootPart.Position.Y + 0.001, vec.Z))
+						            lplr.Character.PrimaryPart.CFrame = CFrame.lookAt(lplr.Character.PrimaryPart.Position, Vector3.new(targetPos.X, lplr.Character.HumanoidRootPart.Position.Y + 0.001, targetPos.Z))
                                 end
 
 								remotes.SwordHit:FireServer({
@@ -250,8 +273,7 @@ run(function()
 									weapon = bestTool,
 									validate = {
 										raycast = {
-											cameraPosition = {value = pos},
-											cursorDirection = {value = dir}
+											cameraPosition = {value = pos}
 										},
 										targetPosition = {value = targetPos},
 										selfPosition = {value = pos}
@@ -300,12 +322,17 @@ local Main = window:tab({
 run(function()
 	local SpeedConn
 	local Value
+	local Method
 
 	local column = Main:column({})
     local Speed = column:section({
 		name = 'Speed',
 		default = true
 	})
+
+	--[[local function getSpeed()
+		return lplr:GetAttribute('SpeedBoost') and 17 or 0
+	end]]
 
 	Speed:toggle({
 		name = 'Speed',
@@ -314,17 +341,33 @@ run(function()
 		seperator = true,
 		callback = function(callback)
             if callback then
-				SpeedConn = runService.PreSimulation:Connect(function()
+				SpeedConn = runService.PreSimulation:Connect(function(delta)
                     if isAlive(lplr) then
-                        lplr.Character.Humanoid.WalkSpeed = Value
+						if Method == 'WalkSpeed' then
+                       		lplr.Character.Humanoid.WalkSpeed = Value
+						elseif Method == 'CFrame' then
+							local speed = (Value - lplr.Character.Humanoid.WalkSpeed)
+
+							lplr.Character.PrimaryPart.CFrame += (lplr.Character.Humanoid.MoveDirection * speed * delta)
+						end
                     end
                 end)
 			else
-				if SpeedCon then
-					SpeedCon:Disconnect()
+				if SpeedConn then
+					SpeedConn:Disconnect()
 				end
 				lplr.Character.Humanoid.WalkSpeed = 16
 			end
+		end
+	})
+	Speed:dropdown({
+		name = 'Method',
+		items = {'CFrame', 'WalkSpeed'},
+		default = 'CFrame',
+		seperator = true,
+
+		callback = function(val)
+			Method = val
 		end
 	})
 	Speed:slider({
@@ -396,8 +439,8 @@ run(function()
 	local sub_section = toggle:settings({})
 	sub_section:keybind({
 		name = 'Keybind',
-		callback = function()
-			toggle.enabled = not toggle.enabled 
+		callback = function(bool)
+			toggle.enabled = bool
             toggle.set(toggle.enabled)
 		end
 	})
@@ -453,10 +496,76 @@ run(function()
 	})
 end)
 
+--[[
+
+	Utility
+
+]]
+
+local self_section3 = window:tab({
+	name = 'Utility',
+	tabs = {'Self'}
+})
+
+run(function()
+	local StealerConn
+	local Range
+	local stealtick = tick()
+
+	local column = self_section3:column({})
+    local Stealer = column:section({
+		name = 'Stealer',
+		default = true
+	})
+
+	Stealer:toggle({
+		name = 'Stealer',
+		seperator = true,
+		callback = function(callback)
+			if callback then
+				StealerConn = runService.RenderStepped:Connect(function()
+					if stealtick < tick() then
+						stealtick = tick() + 0.1
+
+						local chests = getNearestEntity('Chests', Range)
+
+						if chests and chests.ChestFolderValue.Value then
+							remotes.SetObservedChest:FireServer(chests.ChestFolderValue.Value)
+
+							for _, item in next, chests.ChestFolderValue.Value:GetChildren() do
+								if item:IsA('Accessory') then
+									task.spawn(function()
+										remotes.ChestGetItem:InvokeServer(chests.ChestFolderValue.Value, item)
+									end)
+								end
+							end
+
+							remotes.SetObservedChest:FireServer(nil)
+						end
+					end
+				end)
+			else
+				if StealerConn then
+					StealerConn:Disconnect()
+				end
+			end
+		end
+	})
+	Stealer:slider({
+		name = 'Range',
+		min = 0,
+		max = 25,
+		interval = 1,
+		callback = function(int)
+			Range = int
+		end
+	})
+end)
+
 interface:create_notification({
 	name = 'lover.lua',
-	info = 'thanks pook :)',
-	lifetime = 6
+	info = 'Legend man :)',
+	lifetime = 3
 })
 
 interface:init_config(window)
