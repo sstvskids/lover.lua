@@ -159,7 +159,7 @@ run(function()
     
     local column = self_section:column({})
     local knockback = column:section({
-		name = 'Knockback',
+		name = 'Combat',
 		default = true
 	})
 
@@ -187,38 +187,14 @@ run(function()
         end
 	})
 
-	local column2 = self_section:column({})
-	
-	local tool = column2:section({
-		name = 'Tool',
-		default = true
-	})
-
-	tool:toggle({
-		name = 'AutoTool',
-		info = 'Automatically switches your tool',
-
-		seperator = true,
-		callback = function(callback)
-            AutoTool = callback
-        end
-	})
-
-	local column3 = self_section:column({})
-
-	local fps = column3:section({
-		name = 'FPS',
-		default = true
-	})
-
-	fps:toggle({
+	knockback:toggle({
 		name = 'FPS',
 		seperator = true,
 		callback = function(callback)
 			setfpscap(callback and FPS or 60)
         end
 	})
-	fps:slider({
+	knockback:slider({
 		name = 'FPS',
 		min = 60,
 		max = 999,
@@ -559,6 +535,21 @@ run(function()
 		callback = function(int)
 			Range = int
 		end
+	})
+
+	local Tool = column:section({
+		name = 'Tool',
+		default = true
+	})
+
+	Tool:toggle({
+		name = 'AutoTool',
+		info = 'Automatically switches your tool',
+
+		seperator = true,
+		callback = function(callback)
+            AutoTool = callback
+        end
 	})
 end)
 
