@@ -275,7 +275,7 @@ run(function()
 										inst = entity
 									end
 
-									local pos = Vector3.new(roundPos(selfpos.X), roundPos(selfpos.Y), roundPos(selfpos.Z))
+									local pos = Vector3.new(roundPos(selfpos.X), roundPos(selfpos.Y), roundPos(selfpos.Z)) * lplr.Character.Humanoid.MoveDirection
 
 									if Face then
 										lplr.Character.PrimaryPart.CFrame = CFrame.lookAt(lplr.Character.PrimaryPart.Position, Vector3.new(targetPos.X, lplr.Character.HumanoidRootPart.Position.Y + 0.001, targetPos.Z))
