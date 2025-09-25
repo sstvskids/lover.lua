@@ -87,7 +87,13 @@ local function getNearestEntity(entitytype: string, range: number): any?
 		end
 
 		for i,v in collectionService:GetTagged('entity') do
-			if v:HasTag('inventory-entity') and not v:HasTag('Monster') then
+			if v:HasTag('trainingRoomDummy') then
+				if v.PrimaryPart then
+					if (lplr.Character.PrimaryPart.Position - v.PrimaryPart.Position).Magnitude <= range then
+						return v
+					end
+				end
+			elseif v:HasTag('inventory-entity') and not v:HasTag('Monster') then
 				continue
 			elseif v:HasTag('Drone') then
 				if v.PrimaryPart then
