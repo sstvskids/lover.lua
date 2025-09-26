@@ -224,7 +224,7 @@ run(function()
 	Speed:slider({
 		name = 'Speed',
 		min = 0,
-		max = 23,
+		max = 100,
 		interval = 1,
 		callback = function(int)
 			Value = int
