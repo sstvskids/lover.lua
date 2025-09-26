@@ -118,10 +118,13 @@ local function getNearestEntity(entitytype: string, range: number): any?
 end
 
 local function hasItem(item: string)
-    if isAlive(lplr) and workspace[lplr.Name]:FindFirstChild(item) then
-        return true
-    end
+	local suc, res = pcall(function()
+		if isAlive(lplr) and workspace[lplr.Name]:FindFirstChild(item) then
+			return true
+		end
+	end)
 
+	if suc then return res end
     return false
 end
 
@@ -463,7 +466,7 @@ run(function()
 			end
 		end
 	})
-    Player:slider({
+    Fly:slider({
 		name = 'Vertical Speed',
 		min = 0,
 		max = 150,
