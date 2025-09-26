@@ -276,7 +276,7 @@ run(function()
 										inst = entity
 									end
 
-									local pos = Vector3.new(roundPos(selfpos.X), roundPos(selfpos.Y), roundPos(selfpos.Z)) * lplr.Character.Humanoid.MoveDirection
+									local pos = Vector3.new(roundPos(selfpos.X), roundPos(selfpos.Y), roundPos(selfpos.Z))
 
 									if Face then
 										lplr.Character.PrimaryPart.CFrame = CFrame.lookAt(lplr.Character.PrimaryPart.Position, Vector3.new(targetPos.X, lplr.Character.HumanoidRootPart.Position.Y + 0.001, targetPos.Z))
@@ -399,6 +399,7 @@ run(function()
 	})
 
 	local FlyVal = 0
+    local VerticalSpeed
 	local Flight, FlightUp, FlightDown
 	local column2 = Main:column({})
 	local Fly = column2:section({
@@ -417,9 +418,9 @@ run(function()
                 FlightUp = inputService.InputBegan:Connect(function(input)
 					if not inputService:GetFocusedTextBox() then
 						if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
-							FlyVal = 44
+							FlyVal = VerticalSpeed
 						elseif input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.ButtonL2 then
-							FlyVal = -44
+							FlyVal = -VerticalSpeed
 						end
 					end
 				end)
@@ -453,6 +454,15 @@ run(function()
 					end
 				end)
 			end
+		end
+	})
+    Player:slider({
+		name = 'Vertical Speed',
+		min = 0,
+		max = 150,
+		interval = 1,
+		callback = function(int)
+			VerticalSpeed = int
 		end
 	})
 
@@ -586,6 +596,7 @@ run(function()
 	})
 
     local NoFallConn
+    local Method
 	Player:toggle({
 		name = 'NoFall',
 		info = 'Prevents you from taking fall damage',
@@ -595,8 +606,12 @@ run(function()
 			if callback then
 				NoFallConn = runService.PreSimulation:Connect(function()
                     if isAlive(lplr) then
-                        if lplr.Character.Humanoid.FloorMaterial == Enum.Material.Air and lplr.Character.PrimaryPart.Position.Y < -75 then
-                            lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
+                        if lplr.Character.Humanoid.FloorMaterial == Enum.Material.Air and lplr.Character.PrimaryPart.AssemblyLinearVelocity.Y < -75 then
+                            if Method == 'State' then
+                                lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
+                            elseif Method == 'Remote' then
+                                remotes.GroundHit:FireServer(nil, Vector3.new(0, lplr.Character.PrimaryPart.AssemblyLinearVelocity.Y, 0), workspace:GetServerTimeNow())
+                            end
                         end
                     end
 
@@ -607,6 +622,16 @@ run(function()
                     NoFallConn:Disconnect()
                 end
             end
+		end
+	})
+    Player:dropdown({
+		name = 'Method',
+		items = {'Remote', 'State'},
+		default = 'Remote',
+		seperator = true,
+
+		callback = function(val)
+			Method = val
 		end
 	})
 
