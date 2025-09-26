@@ -483,6 +483,10 @@
             if library[ "other" ] then 
                 library[ "other" ]:Destroy()
             end 
+
+            if library[ "notifications" ] then
+                library[ "notifications" ]:Destroy()
+            end
             
             for index, connection in library.connections do 
                 connection:Disconnect() 
@@ -3633,7 +3637,7 @@
 
             local items = cfg.items; do 
                 items[ "notification" ] = library:create( "Frame" , {
-                    Parent = library[ "items" ];
+                    Parent = library[ "notifications" ];
                     Size = dim2(0, 210, 0, 53);
                     Name = "\0";
                     BorderColor3 = rgb(0, 0, 0);

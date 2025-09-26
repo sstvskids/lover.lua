@@ -87,13 +87,7 @@ local function getNearestEntity(entitytype: string, range: number): any?
 		end
 
 		for i,v in collectionService:GetTagged('entity') do
-			if v:HasTag('trainingRoomDummy') then
-				if v.PrimaryPart then
-					if (lplr.Character.PrimaryPart.Position - v.PrimaryPart.Position).Magnitude <= range then
-						return v
-					end
-				end
-			elseif v:HasTag('inventory-entity') and not v:HasTag('Monster') then
+			if v:HasTag('inventory-entity') and not v:HasTag('Monster') then
 				continue
 			elseif v:HasTag('Drone') then
 				if v.PrimaryPart then
@@ -156,6 +150,7 @@ run(function()
         ProjectileFire = NetManaged.ProjectileFire,
         ChestGetItem = NetManaged['Inventory/ChestGetItem'],
         SetObservedChest = NetManaged['Inventory/SetObservedChest'],
+		GroundHit = NetManaged.GroundHit,
         PlaceBlock = BlockEngine.PlaceBlock,
         DamageBlock = BlockEngine.DamageBlock
     }
@@ -540,12 +535,12 @@ run(function()
 	local stealtick = tick()
 
 	local column = self_section3:column({})
-    local Stealer = column:section({
-		name = 'Stealer',
+    local Player = column:section({
+		name = 'Player',
 		default = true
 	})
 
-	Stealer:toggle({
+	Player:toggle({
 		name = 'Stealer',
 		info = 'Automatically steals from chests',
 
@@ -580,13 +575,38 @@ run(function()
 			end
 		end
 	})
-	Stealer:slider({
+	Player:slider({
 		name = 'Range',
 		min = 0,
 		max = 25,
 		interval = 1,
 		callback = function(int)
 			Range = int
+		end
+	})
+
+    local NoFallConn
+	Player:toggle({
+		name = 'NoFall',
+		info = 'Prevents you from taking fall damage',
+
+		seperator = true,
+		callback = function(callback)
+			if callback then
+				NoFallConn = runService.PreSimulation:Connect(function()
+                    if isAlive(lplr) then
+                        if lplr.Character.Humanoid.FloorMaterial == Enum.Material.Air and lplr.Character.PrimaryPart.Position.Y < -75 then
+                            lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
+                        end
+                    end
+
+					task.wait()
+                end)
+			else
+                if NoFallConn then
+                    NoFallConn:Disconnect()
+                end
+            end
 		end
 	})
 
