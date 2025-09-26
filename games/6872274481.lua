@@ -118,23 +118,16 @@ local function getNearestEntity(entitytype: string, range: number): any?
 end
 
 local function hasItem(item: string)
-	local suc, res = pcall(function()
-		if isAlive(lplr) and workspace[lplr.Name]:FindFirstChild(item) then
-			return true
-		end
-	end)
-
-	if suc then return res end
-    return false
+	return workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(item) and true or false
 end
 
 local function getItem(item: string)
-	local suc, res = pcall(function()
-		return workspace[lplr.Name]:FindFirstChild('InventoryFolder').Value:FindFirstChild(item)
-	end)
+    local suc, res = pcall(function()
+        return workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(item)
+    end)
 
-	if suc then return res end
-	return 'no-item'
+    if suc then return res end
+    return 'string'
 end
 
 local function getBestSword()
@@ -167,13 +160,6 @@ run(function()
         DamageBlock = BlockEngine.DamageBlock
     }
 end)
-
-local AutoTool = false
-local function spoofTool(item: string): string
-    if AutoTool == true and isAlive(lplr) and not hasItem(item) then
-        workspace[lplr.Name]:FindFirstChild('InventoryFolder').Value = item
-    end
-end
 
 --[[
 
@@ -269,10 +255,6 @@ run(function()
 
 							if entity then
 								local bestTool = getBestSword()
-
-								if bestTool then
-									spoofTool(bestTool.Name)
-								end
 
 								if hasItem(bestTool.Name) and isAlive(entity) then
 									local targetPos, inst, selfpos
@@ -643,23 +625,6 @@ run(function()
 		callback = function(val)
 			Method = val
 		end
-	})
-
-	local column2 = self_section3:column({})
-
-	local Tool = column2:section({
-		name = 'Tool',
-		default = true
-	})
-
-	Tool:toggle({
-		name = 'AutoTool',
-		info = 'Automatically switches tools when needed',
-
-		seperator = true,
-		callback = function(callback)
-            AutoTool = callback
-        end
 	})
 end)
 
