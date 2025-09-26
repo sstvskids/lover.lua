@@ -58,19 +58,23 @@ task.delay(2, function()
 	end
 end)
 
-local window = interface:window({
-	name = 'lover',
-	suffix = '.lua',
-	gameInfo = 'Milenium for Roblox Bedwars'
-})
-
 local function isAlive(v)
-    if workspace:FindFirstChild(v.Name) then
+    repeat task.wait() until workspace:FindFirstChild(v.Name)
+
+    if workspace[v.Name]:FindFirstChild('Humanoid') then
         return true
     end
 
     return false
 end
+
+repeat task.wait() until isAlive(lplr)
+
+local window = interface:window({
+	name = 'lover',
+	suffix = '.lua',
+	gameInfo = 'Milenium for Roblox Bedwars'
+})
 
 local function getNearestEntity(entitytype: string, range: number): any?
 	if not isAlive(lplr) then return nil end
