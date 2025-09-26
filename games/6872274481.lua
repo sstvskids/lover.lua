@@ -125,6 +125,15 @@ local function hasItem(item: string)
     return false
 end
 
+local function getItem(item: string)
+	local suc, res = pcall(function()
+		return workspace[lplr.Name]:FindFirstChild('InventoryFolder').Value:FindFirstChild(item)
+	end)
+
+	if suc then return res end
+	return 'no-item'
+end
+
 local function getBestSword()
     local bestItem, bestItemStrength = nil, 0
 
@@ -135,7 +144,7 @@ local function getBestSword()
         end
     end
 
-    return workspace:FindFirstChild(lplr.Name):FindFirstChild('InventoryFolder').Value:FindFirstChild(bestItem)
+    return getItem(bestItem)
 end
 
 local remotes
@@ -159,9 +168,7 @@ end)
 local AutoTool = false
 local function spoofTool(item: string): string
     if AutoTool == true and isAlive(lplr) and not hasItem(item) then
-        remotes.SetInvItem:InvokeServer({
-			hand = workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(item)
-		})
+        workspace[lplr.Name]:FindFirstChild('InventoryFolder').Value = item
     end
 end
 
