@@ -80,49 +80,67 @@ local function getNearestEntity(entitytype: string, range: number): any?
 	if not isAlive(lplr) then return nil end
 
 	if entitytype == 'Players' then
-		for i,v in playersService:GetPlayers() do
-			if v == lplr or v.Team == lplr.Team or not isAlive(v) then continue end
+        task.spawn(function()
+            for i,v in playersService:GetPlayers() do
+                if v == lplr or v.Team == lplr.Team or not isAlive(v) then continue end
 
-			if v.Character and v.Character.PrimaryPart then
-				if (lplr.Character.PrimaryPart.Position - v.Character.PrimaryPart.Position).Magnitude <= range then
-					return v
-				end
-			end
-		end
+                if v.Character and v.Character.PrimaryPart then
+                    if (lplr.Character.PrimaryPart.Position - v.Character.PrimaryPart.Position).Magnitude <= range then
+                        return v
+                    end
+                end
+            end
+        end)
 
-		for i,v in collectionService:GetTagged('entity') do
-			if v:HasTag('inventory-entity') and not v:HasTag('Monster') then
-				continue
-			elseif v:HasTag('Drone') then
-				if v.PrimaryPart then
-					local realplr = playersService:GetPlayerByUserId(v:GetAttribute('PlayerUserId'))
-					if realplr.Team == lplr.Team then continue end
+        task.spawn(function()
+            for i,v in collectionService:GetTagged('entity') do
+                if v:HasTag('inventory-entity') and not v:HasTag('Monster') then
+                    continue
+                elseif v:HasTag('Drone') then
+                    if v.PrimaryPart then
+                        local realplr = playersService:GetPlayerByUserId(v:GetAttribute('PlayerUserId'))
+                        if realplr.Team == lplr.Team then continue end
 
-					if (lplr.Character.PrimaryPart.Position - v.PrimaryPart.Position).Magnitude <= range then
-						return v
-					end
-				end
-			end
+                        if (lplr.Character.PrimaryPart.Position - v.PrimaryPart.Position).Magnitude <= range then
+                            return v
+                        end
+                    end
+                end
 
-			if v.PrimaryPart then
-				if (lplr.Character.PrimaryPart.Position - v.PrimaryPart.Position).Magnitude <= range then
-					return v
-				end
-			end
-		end
+                if v.PrimaryPart then
+                    if (lplr.Character.PrimaryPart.Position - v.PrimaryPart.Position).Magnitude <= range then
+                        return v
+                    end
+                end
+            end
+        end)
 	elseif entitytype == 'Chests' then
-		for i,v in objs.chests do
-			if (lplr.Character.PrimaryPart.Position - v.Position).Magnitude <= range then
-				return v
-			end
-		end
+        task.spawn(function()
+            for i,v in objs.chests do
+                if (lplr.Character.PrimaryPart.Position - v.Position).Magnitude <= range then
+                    return v
+                end
+            end
+        end)
 	end
 
 	return nil
 end
 
+--[[local function hasItem(item: string)
+	local suc, res = pcall(function()
+		return workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(item)
+	end)
+
+	if suc and res ~= nil then
+		return true
+	end
+
+	return false
+end]]
+
 local function hasItem(item: string)
-	return workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(item) and true or false
+	return (isAlive(lplr) and workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(item)) and true or false
 end
 
 local function getItem(item: string)
@@ -130,7 +148,10 @@ local function getItem(item: string)
         return workspace[lplr.Name].InventoryFolder.Value:FindFirstChild(item)
     end)
 
-    if suc then return res end
+    if suc and res ~= nil then
+        return res
+    end
+
     return 'string'
 end
 
@@ -138,7 +159,7 @@ local function getBestSword()
     local bestItem, bestItemStrength = nil, 0
 
     for i,v in ipairs(itemMeta) do
-		local item = tostring(v[1])
+        local item = tostring(v[1])
         if hasItem(item) and v[2] > bestItemStrength then
             bestItem, bestItemStrength = v[1], v[2]
         end
@@ -260,22 +281,22 @@ run(function()
 							if entity then
 								local bestTool = getBestSword()
 
-								if hasItem(bestTool.Name) and isAlive(entity) then
-									local targetPos, inst, selfpos
+								if isAlive(entity) then
+									local selfpos, targetPos, inst = (lplr.Character.PrimaryPart.Position + lplr.Character.Humanoid.MoveDirection)
 									if entity:IsA('Player') then
-										targetPos = entity.Character.PrimaryPart.Position
-										selfpos = (lplr.Character.PrimaryPart.Position + entity.Character.Humanoid.MoveDirection)
+										targetPos = entity.Character.PrimaryPart.Position + lplr.Character.Humanoid.MoveDirection
 										inst = entity.Character
 									else
-										targetPos = entity.PrimaryPart.Position
-										selfpos = (lplr.Character.PrimaryPart.Position + entity.Humanoid.MoveDirection)
+										targetPos = entity.PrimaryPart.Position + lplr.Character.Humanoid.MoveDirection
 										inst = entity
 									end
 
-									local pos = Vector3.new(roundPos(selfpos.X), roundPos(selfpos.Y), roundPos(selfpos.Z))
+                                    local vec = Vector3.new(roundPos(selfpos.X), roundPos(selfpos.Y), roundPos(selfpos.Z))
+                                    local dir = CFrame.lookAt(lplr.Character.PrimaryPart.Position, Vector3.new(targetPos.X, lplr.Character.HumanoidRootPart.Position.Y + 0.001, targetPos.Z))
+									local pos = vec + dir.LookVector * math.max((selfpos - targetPos).Magnitude - 14.4999, 0)
 
 									if Face then
-										lplr.Character.PrimaryPart.CFrame = CFrame.lookAt(lplr.Character.PrimaryPart.Position, Vector3.new(targetPos.X, lplr.Character.HumanoidRootPart.Position.Y + 0.001, targetPos.Z))
+										lplr.Character.PrimaryPart.CFrame = dir
 									end
 
 									task.spawn(function()
@@ -285,7 +306,8 @@ run(function()
 											weapon = bestTool,
 											validate = {
 												raycast = {
-													cameraPosition = {value = pos}
+													cameraPosition = {value = pos},
+                                                    cursorPostition = {value = dir.LookVector}
 												},
 												targetPosition = {value = targetPos},
 												selfPosition = {value = pos}
@@ -555,10 +577,9 @@ run(function()
 			if callback then
 				StealerConn = runService.RenderStepped:Connect(function()
 					if stealtick < tick() then
-						stealtick = tick() + 0.1
-
+						stealtick = tick() + 0.05
 						local chests = getNearestEntity('Chests', Range)
-
+						
 						if chests and chests.ChestFolderValue.Value then
 							remotes.SetObservedChest:FireServer(chests.ChestFolderValue.Value)
 
